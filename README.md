@@ -43,7 +43,6 @@ A website disguised as Google Meet that secretly captures user's faces.
 2.  You will be prompted to enter the number of pictures to take.
 3.  You will be prompted to choose a hosting method:
     *   `localhost`
-    *   `localxpose`
     *   `cloudflare`
     *   `ngrok`
 4.  The script will automatically install dependencies and set up the chosen hosting method.

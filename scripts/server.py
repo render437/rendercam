@@ -47,4 +47,4 @@ capture.counter = 0
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         num_pictures = int(sys.argv[1])
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0') # Disable debug and specify host

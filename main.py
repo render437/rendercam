@@ -2,14 +2,6 @@ import os
 import subprocess
 import sys
 
-def install_dependencies():
-    print("Installing dependencies...")
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "flask", "opencv-python", "localxpose", "pyngrok"])
-    except subprocess.CalledProcessError as e:
-        print(f"Error installing dependencies: {e}")
-        sys.exit(1)
-
 def display_menu():
     print("""
                      _                              
@@ -36,25 +28,17 @@ def choose_hosting():
     while True:
         print("\nChoose a hosting method:")
         print("1. localhost")
-        print("2. localxpose")
-        print("3. ngrok")
-        choice = input("Enter your choice (1-3): ")
+        print("2. ngrok")  # Removed localxpose
+        choice = input("Enter your choice (1-2): ")  # Adjusted range
 
-        if choice in ("1", "2", "3"):
+        if choice in ("1", "2"):  # Adjusted options
             return choice
         else:
-            print("Invalid choice. Please enter 1, 2, or 3.")
+            print("Invalid choice. Please enter 1 or 2.")
 
 def setup_localhost():
     print("Setting up localhost...")
     # Instructions for running the Flask server on localhost will be in server.py
-
-def setup_localxpose():
-    print("Setting up localxpose...")
-    try:
-        subprocess.run(["localxpose", "http", "5000"], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error running localxpose: {e}")
 
 def setup_ngrok():
     print("Setting up ngrok...")
@@ -69,16 +53,13 @@ def setup_ngrok():
 
 def main():
     display_menu()
-    install_dependencies()
     num_pictures = get_num_pictures()
     hosting_choice = choose_hosting()
 
     if hosting_choice == "1":
         setup_localhost()
     elif hosting_choice == "2":
-        setup_localxpose()
-    elif hosting_choice == "3":
-        setup_ngrok()
+        setup_ngrok() # removed localxpose
 
     # Run the Flask server
     print("Starting the Flask server...")

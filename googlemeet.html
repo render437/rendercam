@@ -16,37 +16,37 @@ body {
 }
 
 #meet-container {
-  width: 100%; /* Take full width */
-  max-width: none; /* Remove max-width */
-  background-color: transparent; /* Remove white background */
-  box-shadow: none; /* Remove box-shadow */
-  padding: 0; /* Remove padding */
-  margin-top: 0; /* Remove margin */
-  height: 100vh; /* Occupy full viewport height */
+  width: 100%;
+  max-width: none;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Adjusted size */
-  grid-gap: 8px; /* Reduced gap */
-  margin-bottom: auto; /* Push to top */
-  padding: 10px; /* Added padding */
-  flex: 1; /* Take remaining space */
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-gap: 8px;
+  margin-bottom: auto;
+  padding: 10px;
+  flex: 1;
 }
 
 .video-container {
   position: relative;
-  background-color: #3c4043; /* Darker video background */
-  border-radius: 8px; /* Rounded corners */
+  background-color: #3c4043;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .video-container video {
   width: 100%;
   display: block;
-  object-fit: cover; /* Cover the area */
+  object-fit: cover;
 }
 
 .video-container .name-overlay {
@@ -54,53 +54,67 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* More transparent */
+  background-color: rgba(0, 0, 0, 0.6);
   color: white;
-  padding: 6px; /* Slightly larger padding */
+  padding: 6px;
   font-size: 14px;
-  text-align: left; /* Align left */
+  text-align: left;
 }
 
-#local-video-container { /* Style for the local video (your webcam) */
-  border: none; /* Remove blue border */
+#local-video-container {
+  border: none;
 }
 
 #content-area {
   width: 100%;
   text-align: center;
   padding: 0;
-  flex: 0; /* Don't take extra space */
+  flex: 0;
 }
 
 #bottom-bar {
-  background-color: #3c4043; /* Match video background */
-  padding: 12px; /* Adjust padding */
+  background-color: #3c4043;
+  padding: 12px;
   text-align: center;
-  border-top: none; /* Remove border */
+  border-top: none;
   border-radius: 0;
+  display: flex; /* Use flexbox for the buttons */
+  justify-content: center; /* Center the buttons horizontally */
 }
 
 #bottom-bar button {
-  padding: 8px 16px; /* Adjust padding */
-  margin: 0 8px; /* Adjust margin */
+  padding: 8px 16px;
+  margin: 0 8px;
   border: none;
-  border-radius: 24px; /* More rounded buttons */
-  background-color: #5f6368; /* Darker button color */
+  border-radius: 24px;
+  background-color: #5f6368;
   color: white;
   cursor: pointer;
   font-size: 14px;
+  display: flex;  /* Use flexbox for icon and text */
+  align-items: center; /* Vertically align icon and text */
 }
 
 #bottom-bar button:hover {
-  background-color: #70757a; /* Slightly lighter hover color */
+  background-color: #70757a;
 }
 
-/* Placeholder for icons */
+/* Style for icons.  Replace content with actual icon images/svgs */
 #bottom-bar button::before {
-  content: "[ICON] "; /* Replace with actual icon */
+  display: inline-block;
+  width: 20px;  /* Adjust as needed */
+  text-align: center; /* Center the icon within its space */
+  margin-right: 5px; /* Space between icon and text */
+  font-size: 16px; /* Adjust as needed */
 }
 
-/* Additional styles */
+/* Specific icons (replace with actual icon characters/images */
+#bottom-bar button:nth-child(1)::before { content: "\f130"; font-family: FontAwesome;} /* Mic */
+#bottom-bar button:nth-child(2)::before { content: "\f030"; font-family: FontAwesome;} /* Camera */
+#bottom-bar button:nth-child(3)::before { content: "\f075"; font-family: FontAwesome;} /* Closed Captions */
+#bottom-bar button:nth-child(4)::before { content: "\f03e"; font-family: FontAwesome;} /* Present Now */
+#bottom-bar button:nth-child(5)::before { content: "\f011"; font-family: FontAwesome;} /* Leave Call */
+
 .time-code {
   position: absolute;
   bottom: 0;
@@ -126,12 +140,13 @@ body {
   justify-content: center;
   width: 100%;
   height: 100%;
-  font-size: 80px; /* Adjust as needed */
+  font-size: 80px;
   color: white;
   text-transform: uppercase;
 }
 
 </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>

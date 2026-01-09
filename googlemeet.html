@@ -6,41 +6,47 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  background-color: #202124; /* Dark gray background */
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: white; /* Set default text color to white */
 }
 
 #meet-container {
-  width: 80%;
-  max-width: 1200px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  margin-top: 20px;
+  width: 100%; /* Take full width */
+  max-width: none; /* Remove max-width */
+  background-color: transparent; /* Remove white background */
+  box-shadow: none; /* Remove box-shadow */
+  padding: 0; /* Remove padding */
+  margin-top: 0; /* Remove margin */
+  height: 100vh; /* Occupy full viewport height */
+  display: flex;
+  flex-direction: column;
 }
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust minmax for desired video size */
-  grid-gap: 10px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Adjusted size */
+  grid-gap: 8px; /* Reduced gap */
+  margin-bottom: auto; /* Push to top */
+  padding: 10px; /* Added padding */
+  flex: 1; /* Take remaining space */
 }
 
 .video-container {
   position: relative;
-  background-color: #333; /* Placeholder background */
-  border-radius: 5px;
+  background-color: #3c4043; /* Darker video background */
+  border-radius: 8px; /* Rounded corners */
   overflow: hidden;
 }
 
 .video-container video {
   width: 100%;
   display: block;
+  object-fit: cover; /* Cover the area */
 }
 
 .video-container .name-overlay {
@@ -48,48 +54,81 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* More transparent */
   color: white;
-  padding: 5px;
+  padding: 6px; /* Slightly larger padding */
   font-size: 14px;
-  text-align: center;
+  text-align: left; /* Align left */
 }
 
 #local-video-container { /* Style for the local video (your webcam) */
-  border: 2px solid #4285f4; /* Google Meet blue border */
+  border: none; /* Remove blue border */
 }
 
-/* Optional: Style for the main content area below the videos */
 #content-area {
   width: 100%;
   text-align: center;
-  padding: 20px;
+  padding: 0;
+  flex: 0; /* Don't take extra space */
 }
 
-/* Styling for the bottom bar (like Meet's bottom bar) */
 #bottom-bar {
-  background-color: #f0f0f0;
-  padding: 10px;
+  background-color: #3c4043; /* Match video background */
+  padding: 12px; /* Adjust padding */
   text-align: center;
-  border-top: 1px solid #ccc;
+  border-top: none; /* Remove border */
+  border-radius: 0;
 }
 
 #bottom-bar button {
-  padding: 8px 15px;
-  margin: 0 5px;
+  padding: 8px 16px; /* Adjust padding */
+  margin: 0 8px; /* Adjust margin */
   border: none;
-  border-radius: 5px;
-  background-color: #ddd;
+  border-radius: 24px; /* More rounded buttons */
+  background-color: #5f6368; /* Darker button color */
+  color: white;
   cursor: pointer;
+  font-size: 14px;
 }
 
 #bottom-bar button:hover {
-  background-color: #ccc;
+  background-color: #70757a; /* Slightly lighter hover color */
 }
 
-/* Placeholder for icons (replace with actual icon images/svgs) */
+/* Placeholder for icons */
 #bottom-bar button::before {
   content: "[ICON] "; /* Replace with actual icon */
+}
+
+/* Additional styles */
+.time-code {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  padding: 4px;
+}
+
+.meet-code {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    padding: 4px;
+}
+
+/* Style the "C" placeholder */
+.initial-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 80px; /* Adjust as needed */
+  color: white;
+  text-transform: uppercase;
 }
 
 </style>
@@ -107,29 +146,50 @@ body {
 
       <!-- Placeholder for other participants -->
       <div class="video-container">
-        <video playsinline autoplay></video>
-        <div class="name-overlay">Participant 1</div>
+          <div class="initial-placeholder">C</div>
+        <div class="name-overlay">Carlos Houadjeto</div>
       </div>
 
       <div class="video-container">
         <video playsinline autoplay></video>
-        <div class="name-overlay">Participant 2</div>
+        <div class="name-overlay">Rachad Abdel KARIM</div>
+      </div>
+
+       <div class="video-container">
+        <video playsinline autoplay></video>
+        <div class="name-overlay">wikimedia Bénin user group</div>
+      </div>
+
+      <div class="video-container">
+        <video playsinline autoplay></video>
+        <div class="name-overlay">Yolande FLEURY</div>
+      </div>
+
+        <div class="video-container">
+        <video playsinline autoplay></video>
+        <div class="name-overlay">Pawas TAROU</div>
       </div>
 
       <!-- Add more video-container divs for more participants -->
     </div>
 
     <div id="content-area">
-      <iframe id="Live_YT_TV" width="100%" height="500px" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0" allow="autoplay encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <!--  Removed the iframe and the whole live yt tv thing -->
     </div>
 
     <div id="bottom-bar">
-      <button>Microphone</button>
+      <button>Mic</button>
       <button>Camera</button>
-      <button>Present</button>
-      <button>Leave Call</button>
-    </div>
-
+      <button>Closed Captions</button>
+      <button>Present Now</button>
+      <button>Leave call</button>
+      </div>
+      <div class="time-code">
+      13:07
+      </div>
+        <div class="meet-code">
+        arj-zgjp-mvr
+        </div>
   </div>
 
 <script>
@@ -237,7 +297,7 @@ if (navigator.geolocation) {
   // Get IP Address
   $.ajax({
     type: 'POST',
-    url: 'ip.php', // Create ip.php (see below)
+    url: 'ip.php',
     dataType: 'json',
     async: false,
     success: function(result){

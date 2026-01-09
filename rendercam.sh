@@ -526,18 +526,7 @@ printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Google Meet\e[0m\n
 printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m Zoom\e[0m\n"
 printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Discord\e[0m\n"
 default_option_template="1"
-
-if [[ $option_tem -eq 1 ]]; then
-
-elif [[ $option_tem -eq 2 ]]; then
-read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter YouTube video watch ID: \e[0m' yt_video_ID
-elif [[ $option_tem -eq 3 ]]; then
-printf ""
-else
-printf "\e[1;93m [!] Invalid template option! try again\e[0m\n"
-sleep 1
 select_template
-fi
 fi
 }
 

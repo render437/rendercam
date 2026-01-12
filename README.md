@@ -33,7 +33,7 @@
 
 ### Features
 
-- Latest and updated pages.
+- Latest and fully updated pages.
 - Beginner friendly
 - Multiple tunneling options
   - Localhost

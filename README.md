@@ -155,7 +155,7 @@ Thanks to these amazing people for helping me build and improve this project!
 *If you are unsure about the legality of an action, seek professional legal advice before proceeding. **You shall not misuse the information to gain unauthorized access to someones social media**.*
   
 *This project is for educational, penetration-testing, or phishing-simulation purposes only.*
-- **Not for malicious use.***
+- **Not for malicious use.**
 
 
 <!-- // -->

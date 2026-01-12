@@ -80,7 +80,7 @@
 
 ### All-In-One Command
 
-- Paste this command into your terminal - 
+- Paste this command into your terminal -
   ```
   git clone --depth=1 https://github.com/render437/rendercam.git; cd rendercam; bash rendercam.sh
   ```

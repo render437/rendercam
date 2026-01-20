@@ -78,18 +78,19 @@ fi
 
 trap 'printf "\n";stop' 2
 
-## Main Banner
+## Banner
 banner() {
     cat << EOF
-                 ${CYAN}                     _
-                 ${CYAN}                    | |
-                 ${CYAN}  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___   
-                 ${CYAN} |  __/ _ \  _ \ / _  |/ _ \  __| / __/ _  |  _   _ \  
-                 ${CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | | 
-                 ${CYAN} |_|  \___|_| |_|\__,_|\___|_|    \___\__,_|_| |_| |_| 
-                 ${CYAN}     ${RED}Tool created by Render${CYAN}             ${RED}Version: ${__version__} 
-
-        EOF
+ ${CYAN}
+ ${CYAN}                     _
+ ${CYAN}                    | |
+ ${CYAN}  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___   
+ ${CYAN} |  __/ _ \  _ \ / _  |/ _ \  __| / __/ _  |  _   _ \  
+ ${CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | | 
+ ${CYAN} |_|  \___|_| |_|\__,_|\___|_|    \___\__,_|_| |_| |_| 
+ ${CYAN}     ${RED}Tool created by Render${CYAN}             ${RED}Version: ${__version__} 
+ 
+EOF
 }
 
 

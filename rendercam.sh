@@ -703,12 +703,12 @@ main_menu() {
 	cat <<- EOF
 		 ${RED}Select An Attack For Your Victim:
 		 
-		 ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
-		 ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
-		 ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
+		 ${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
+		 ${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
+		 ${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
 		 
-		 ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
-		 ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit
+		 ${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
+		 ${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit    
 
 	EOF
 

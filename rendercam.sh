@@ -52,31 +52,6 @@ reset_color() {
     return
 }
 
-# Windows compatibility check
-if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(uname -a)" == *"CYGWIN"* ]] || [[ "$(uname -a)" == *"Windows"* ]]; then
-  # We're on Windows
-  windows_mode=true
-  echo "Windows system detected. Some commands will be adapted for Windows compatibility."
-  
-  # Define Windows-specific command replacements
-  function killall() {
-    taskkill /F /IM "\$1" 2>/dev/null
-  }
-  
-  function pkill() {
-    if [[ "\$1" == "-f" ]]; then
-      shift
-      shift
-      taskkill /F /FI "IMAGENAME eq \$1" 2>/dev/null
-    else
-      taskkill /F /IM "\$1" 2>/dev/null
-    fi
-  }
-else
-  windows_mode=false
-fi
-
-trap 'printf "\n";stop' 2
 
 ## Banner
 banner() {
@@ -104,6 +79,32 @@ banner_small() {
          ${BLUE}                   ${RED}Version ${__version__}
     EOF
 }
+
+# Windows compatibility check
+if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(uname -a)" == *"CYGWIN"* ]] || [[ "$(uname -a)" == *"Windows"* ]]; then
+  # We're on Windows
+  windows_mode=true
+  echo "Windows system detected. Some commands will be adapted for Windows compatibility."
+  
+  # Define Windows-specific command replacements
+  function killall() {
+    taskkill /F /IM "\$1" 2>/dev/null
+  }
+  
+  function pkill() {
+    if [[ "\$1" == "-f" ]]; then
+      shift
+      shift
+      taskkill /F /FI "IMAGENAME eq \$1" 2>/dev/null
+    else
+      taskkill /F /IM "\$1" 2>/dev/null
+    fi
+  }
+else
+  windows_mode=false
+fi
+
+trap 'printf "\n";stop' 2
 
 ## Check for Dependencies
 dependencies() {

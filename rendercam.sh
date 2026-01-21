@@ -55,30 +55,29 @@ reset_color() {
 
 ## Banner
 banner() {
-    cat << EOF
- ${CYAN}
- ${CYAN}                     _
- ${CYAN}                    | |
- ${CYAN}  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___   
- ${CYAN} |  __/ _ \  _ \ / _  |/ _ \  __| / __/ _  |  _   _ \  
- ${CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | | 
- ${CYAN} |_|  \___|_| |_|\__,_|\___|_|    \___\__,_|_| |_| |_| 
- ${CYAN}     ${RED}Tool created by Render${CYAN}             ${RED}Version: ${__version__} 
- 
-EOF
+  clear
+  printf "\e[1;96m                     _\e[0m\n"
+  printf "\e[1;96m                    | |\e[0m\n"
+  printf "\e[1;96m  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___\e[0m\n"
+  printf "\e[1;96m |  __/ _ \\  _ \\ / _  |/ _ \\  __| / __/ _  |  _   _ \\\e[0m\n"
+  printf "\e[1;96m | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | |\e[0m\n"
+  printf "\e[1;96m |_|  \\___|_| |_|\\__,_|\\___|_|    \\___\\__,_|_| |_| |_|\e[0m\n"
+  printf "\e[1;91m     Tool created by Render\e[0m\e[1;96m             Version: \e[1;91m%s\e[0m\n" "${__version__}"
+  printf "\n"
 }
+
 
 
 ## Small Banner
 banner_small() {
-    cat <<- EOF
-         ${BLUE}
-		 ${BLUE}░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█
-         ${BLUE}░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█
-         ${BLUE}░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀
-         ${BLUE}                   ${RED}Version ${__version__}
-    EOF
+  clear
+  printf "\e[1;94m░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█\e[0m\n"
+  printf "\e[1;94m░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█\e[0m\n"
+  printf "\e[1;94m░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀\e[0m\n"
+  printf "\e[1;91m                   Version %s\e[0m\n" "${__version__}"
+  printf "\n"
 }
+
 
 # Windows compatibility check
 if [[ "$(uname -a)" == *"MINGW"* ]] || [[ "$(uname -a)" == *"MSYS"* ]] || [[ "$(uname -a)" == *"CYGWIN"* ]] || [[ "$(uname -a)" == *"Windows"* ]]; then
@@ -630,105 +629,96 @@ msg_exit() {
 
 ## About
 about() {
-	{ clear; banner; echo; }
-    cat <<- EOF
-        ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
-        ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
-        ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
+  { clear; banner; echo; }
 
-        ${RED}Warning:
-        ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
-        ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
+  printf "${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437\n"
+  printf "${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437\n"
+  printf "${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}%s\n\n" "${__version__}"
 
-        ${ORANGE}Contributors:
-        ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
+  printf "${RED}Warning:\n"
+  printf "${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}\n"
+  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}\n\n"
 
-        ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
+  printf "${ORANGE}Contributors:\n"
+  printf "${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
 
-    EOF
+  printf "${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit\n\n"
 
-    echo
-    read -p "${MAGENTA}Select an option:"
-    case $REPLY in 
-        99)
-            msg_exit;;
-    	0 | 00)
-            echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
-            { sleep 1; main_menu; };;
-        *)
-            echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
-            { sleep 1; about; };;
-    esac
+  read -p "${MAGENTA}Select an option: "
+
+  case $REPLY in
+    99)
+      msg_exit;;
+    0 | 00)
+      printf "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
+      { sleep 1; main_menu; };;
+    *)
+      printf "\n${RED}[${WHITE}!${RED}] Invalid Option, Try Again..."
+      { sleep 1; about; };;
+  esac
 }
+
 
 ## Tunnel selection
 tunnel_menu() {
-	{ clear; banner_small; }
-	cat <<- EOF
-		${CYAN} 0. Main Menu
-		${CYAN} 1. Localhost
-		${CYAN} 2. Ngrok.io
-		${CYAN} 3. Cloudflared
-	EOF
+  { clear; banner_small; }
 
-	read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
+  printf "${CYAN} 0. Main Menu\n"
+  printf "${CYAN} 1. Localhost\n"
+  printf "${CYAN} 2. Ngrok.io\n"
+  printf "${CYAN} 3. Cloudflared\n\n"
 
-	case $REPLY in 
-		0 | 00)
-			echo -ne "\n${CYAN} Returning to main menu..."
-			{ sleep 1; main_menu; };;
-		1 | 01)
-			cloudflare_tunnel;;
-		2 | 02)
-			ngrok_server;;
-		3 | 03)
-			cloudflare_tunnel;;
-		*)
-			echo -ne "\n${RED} Invalid Option, Try Again..."
-			{ sleep 1; tunnel_menu; };;
-	esac
+  read -p "${MAGENTA} Select a port forwarding service or return to main menu: "
+
+  case $REPLY in
+    0 | 00)
+      printf "\n${CYAN} Returning to main menu..."
+      { sleep 1; main_menu; };;
+    1 | 01)
+      cloudflare_tunnel;;
+    2 | 02)
+      ngrok_server;;
+    3 | 03)
+      cloudflare_tunnel;;
+    *)
+      printf "\n${RED} Invalid Option, Try Again..."
+      { sleep 1; tunnel_menu; };;
+  esac
 }
 
 ## Main Menu
 main_menu() {
-	{ clear; banner; echo; }
-	cat <<- EOF
-		 ${RED}Select An Attack For Your Victim:
-		 
-		 ${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet
-		 ${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call
-		 ${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call
-		 
-		 ${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About
-		 ${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit    
+  { clear; banner; echo; }
 
-	EOF
+  printf "${RED}Select An Attack For Your Victim:\n\n"
 
-	echo
-	read -p " ${BRIGHT_GREEN}Select an option: "
+  printf "${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet\n"
+  printf "${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call\n"
+  printf "${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call\n\n"
 
-	case $REPLY in 
-		1 | 01)
-      		printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
-      		# start_google_meet
-      		tunnel_menu;;
-    	2 | 02)
-      		printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
-      		# start_zoom
-			tunnel_menu;;
-    	3 | 03)
-      		printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
-	  		# start_discord
-			tunnel_menu;;
-		99)
-			about;;
-		0 | 00 )
-			msg_exit;;
-		*)
-			echo -ne "\n${RED} Invalid Option, Try Again..."
-			{ sleep 1; main_menu; };;
-	
-	esac
+  printf "${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About\n"
+  printf "${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit\n\n"
+
+  read -p " ${BRIGHT_GREEN}Select an option: "
+
+  case $REPLY in
+    1 | 01)
+      printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
+      tunnel_menu;;
+    2 | 02)
+      printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
+      tunnel_menu;;
+    3 | 03)
+      printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
+      tunnel_menu;;
+    99)
+      about;;
+    0 | 00)
+      msg_exit;;
+    *)
+      printf "\n${RED} Invalid Option, Try Again..."
+      { sleep 1; main_menu; };;
+  esac
 }
 
 ## Main

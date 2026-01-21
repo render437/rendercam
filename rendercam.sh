@@ -96,13 +96,13 @@ EOF
 
 ## Small Banner
 banner_small() {
-        cat <<- EOF
-                 ${BLUE}
-                 ${BLUE}░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█
-                 ${BLUE}░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█
-                 ${BLUE}░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀
-                 ${BLUE}                       ${RED}Version ${__version__}
-        EOF
+    cat <<- EOF
+         ${BLUE}
+		 ${BLUE}░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█
+         ${BLUE}░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█
+         ${BLUE}░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀
+         ${BLUE}                   ${RED}Version ${__version__}
+    EOF
 }
 
 ## Kill Processes
@@ -141,38 +141,38 @@ exit 1
 BASE_DIR=$(realpath "$(dirname "$BASH_SOURCE")")
 
 if [[ ! -d ".server" ]]; then
-        mkdir -p ".server"
+    mkdir -p ".server"
 fi
 
 if [[ ! -d "auth" ]]; then
-        mkdir -p "auth"
+    mkdir -p "auth"
 fi
 
 if [[ -d ".server/www" ]]; then
-        rm -rf ".server/www"
-        mkdir -p ".server/www"
+    rm -rf ".server/www"
+    mkdir -p ".server/www"
 else
-        mkdir -p ".server/www"
+    mkdir -p ".server/www"
 fi
 
 ## Remove logfile
 if [[ -e ".server/.loclx" ]]; then
-        rm -rf ".server/.loclx"
+    rm -rf ".server/.loclx"
 fi
 
 if [[ -e ".server/.cld.log" ]]; then
-        rm -rf ".server/.cld.log"
+    rm -rf ".server/.cld.log"
 fi
 
 ## Script termination
 exit_on_signal_SIGINT() {
-        { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Interrupted." 2>&1; reset_color; }
-        exit 0
+    { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Interrupted." 2>&1; reset_color; }
+    exit 0
 }
 
 exit_on_signal_SIGTERM() {
-        { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Terminated." 2>&1; reset_color; }
-        exit 0
+    { printf "\n\n%s\n\n" "${RED}[${WHITE}!${RED}]${RED} Program Terminated." 2>&1; reset_color; }
+    exit 0
 }
 
 trap exit_on_signal_SIGINT SIGINT
@@ -191,82 +191,82 @@ kill_pid() {
 
 # Check for new update
 check_update() {
-  local release_url='https://api.github.com/repos/render437/rendercam/releases/latest'
-  local ua='rendercam-updater/1.0 (+https://example.com)'
-  local tmpfile new_version tarball_url
+	local release_url='https://api.github.com/repos/render437/rendercam/releases/latest'
+	local ua='rendercam-updater/1.0 (+https://example.com)'
+	local tmpfile new_version tarball_url
+	
+	# Prerequisites check
+	for cmd in curl tar mktemp awk grep; do
+		command -v "$cmd" >/dev/null 2>&1 || {
+			echo "[!] Required command '$cmd' not found"
+      		return 1
+    	}
+  	done
 
-  # Prerequisites check
-  for cmd in curl tar mktemp awk grep; do
-    command -v "$cmd" >/dev/null 2>&1 || {
-      echo "[!] Required command '$cmd' not found"
-      return 1
-    }
-  done
+	[ -n "$__version__" ] || { echo "[!] __version__ not set"; return 1; }
+	[ -n "$BASE_DIR" ]   || { echo "[!] BASE_DIR not set"; return 1; }
 
-  [ -n "$__version__" ] || { echo "[!] __version__ not set"; return 1; }
-  [ -n "$BASE_DIR" ]   || { echo "[!] BASE_DIR not set"; return 1; }
+	echo -ne "\n${BRIGHT_GREEN} Checking for update: "
 
-  echo -ne "\n${BRIGHT_GREEN} Checking for update: "
+	# --- Get latest version safely ---
+	if command -v jq >/dev/null 2>&1; then
+		new_version=$(curl -sS -A "$ua" "$release_url" | jq -r '.tag_name // .name // empty')
+	else
+    	new_version=$(curl -sS -A "$ua" "$release_url" \
+		| grep -E '"tag_name"|"name"' \
+		| head -n1 \
+		| awk -F\" '{print $4}')
+  	fi
 
-  # --- Get latest version safely ---
-  if command -v jq >/dev/null 2>&1; then
-    new_version=$(curl -sS -A "$ua" "$release_url" | jq -r '.tag_name // .name // empty')
-  else
-    new_version=$(curl -sS -A "$ua" "$release_url" \
-      | grep -E '"tag_name"|"name"' \
-      | head -n1 \
-      | awk -F\" '{print $4}')
-  fi
+	if [ -z "$new_version" ]; then
+		echo -e "${ORANGE}Could not determine latest version.${WHITE}"
+		return 1
+	fi
 
-  if [ -z "$new_version" ]; then
-    echo -e "${ORANGE}Could not determine latest version.${WHITE}"
-    return 1
-  fi
+	tarball_url="https://github.com/render437/rendercam/archive/refs/tags/${new_version}.tar.gz"
 
-  tarball_url="https://github.com/render437/rendercam/archive/refs/tags/${new_version}.tar.gz"
+	# --- Compare versions ---
+	if [[ "$new_version" != "$__version__" ]]; then
+		echo -e "${ORANGE}Update found${WHITE}"
+    	sleep 1
+    	echo -ne "\n${BRIGHT_GREEN} Downloading Update..."
 
-  # --- Compare versions ---
-  if [[ "$new_version" != "$__version__" ]]; then
-    echo -e "${ORANGE}Update found${WHITE}"
-    sleep 1
-    echo -ne "\n${BRIGHT_GREEN} Downloading Update..."
+		tmpfile=$(mktemp /tmp/rendercam.XXXXXX.tar.gz) \
+			|| { echo "[!] mktemp failed"; return 1; }
 
-    tmpfile=$(mktemp /tmp/rendercam.XXXXXX.tar.gz) \
-      || { echo "[!] mktemp failed"; return 1; }
+		# Download safely with retries
+    	if ! curl --fail --show-error --retry 3 --retry-delay 2 -L \
+      		-A "$ua" -o "$tmpfile" "$tarball_url"; then
+      		echo -e "\n${RED} Error occurred while downloading.${WHITE}"
+      		rm -f "$tmpfile"
+      		return 1
+		fi
 
-    # Download safely with retries
-    if ! curl --fail --show-error --retry 3 --retry-delay 2 -L \
-      -A "$ua" -o "$tmpfile" "$tarball_url"; then
-      echo -e "\n${RED} Error occurred while downloading.${WHITE}"
-      rm -f "$tmpfile"
-      return 1
-    fi
+		# Ensure BASE_DIR exists
+		if [ ! -d "$BASE_DIR" ] && ! mkdir -p "$BASE_DIR"; then
+			echo -e "\n${RED} Cannot create BASE_DIR: $BASE_DIR${WHITE}"
+			rm -f "$tmpfile"
+			return 1
+		fi
 
-    # Ensure BASE_DIR exists
-    if [ ! -d "$BASE_DIR" ] && ! mkdir -p "$BASE_DIR"; then
-      echo -e "\n${RED} Cannot create BASE_DIR: $BASE_DIR${WHITE}"
-      rm -f "$tmpfile"
-      return 1
-    fi
+    	# Extract safely
+    	if ! tar -xzf "$tmpfile" -C "$BASE_DIR" --strip-components=1 >/dev/null 2>&1; then
+      		echo -e "\n\n${RED} Error occurred while extracting.${WHITE}"
+			rm -f "$tmpfile"
+			return 1
+		fi
 
-    # Extract safely
-    if ! tar -xzf "$tmpfile" -C "$BASE_DIR" --strip-components=1 >/dev/null 2>&1; then
-      echo -e "\n\n${RED} Error occurred while extracting.${WHITE}"
-      rm -f "$tmpfile"
-      return 1
-    fi
+		rm -f "$tmpfile"
+    	{ sleep 1; clear; banner_small; } 2>/dev/null
+    	echo -e "\n${BRIGHT_GREEN} Successfully updated to ${new_version}! Run rendercam again\n"
+    	reset_color 2>/dev/null || true
+    	return 0
 
-    rm -f "$tmpfile"
-    { sleep 1; clear; banner_small; } 2>/dev/null
-    echo -e "\n${BRIGHT_GREEN} Successfully updated to ${new_version}! Run rendercam again\n"
-    reset_color 2>/dev/null || true
-    return 0
-
-  else
-    echo -e "${GREEN}Up to date${WHITE}"
-    sleep .5
-    return 0
-  fi
+  	else
+    	echo -e "${GREEN}Up to date${WHITE}"
+    	sleep .5
+		return 0
+  	fi
 }
 
 ## Check Internet Status

@@ -47,9 +47,9 @@ RESETBG="$(printf '\033[49m')"
 
 ## Reset terminal colors
 reset_color() {
-        tput sgr0   # reset attributes
-        tput op     # reset color
-        return
+    tput sgr0   # reset attributes
+    tput op     # reset color
+    return
 }
 
 # Windows compatibility check
@@ -438,35 +438,35 @@ msg_exit() {
 
 ## About
 about() {
-        { clear; banner; echo; }
-        cat <<- EOF
-                ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
-                ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
-                ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
+	{ clear; banner; echo; }
+    cat <<- EOF
+        ${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437
+        ${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437
+        ${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}${__version__}
 
-                ${RED}Warning:
-                ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
-                ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
+        ${RED}Warning:
+        ${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}
+        ${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}
 
-                ${ORANGE}Contributors:
-                ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
+        ${ORANGE}Contributors:
+        ${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek
 
-                ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
+        ${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit
 
-        EOF
+    EOF
 
-        echo
-        read -p "${MAGENTA}Select an option:"
-        case $REPLY in 
-                99)
-                        msg_exit;;
-                0 | 00)
-                        echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
-                        { sleep 1; main_menu; };;
-                *)
-                        echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
-                        { sleep 1; about; };;
-        esac
+    echo
+    read -p "${MAGENTA}Select an option:"
+    case $REPLY in 
+        99)
+            msg_exit;;
+    	0 | 00)
+            echo -ne "\n${GREEN}[${WHITE}+${GREEN}]${CYAN} Returning to main menu..."
+            { sleep 1; main_menu; };;
+        *)
+            echo -ne "\n${RED}[${WHITE}!${RED}]${RED} Invalid Option, Try Again..."
+            { sleep 1; about; };;
+    esac
 }
 
 

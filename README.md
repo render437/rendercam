@@ -59,7 +59,7 @@
 
 - This tool require PHP for webserver, and wget for downloading dependencies -
   ```
-  apt-get -y install php wget unzip
+  sudo apt-get -y install php wget unzip
   ```
   
 - Just, clone this repository -

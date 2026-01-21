@@ -57,6 +57,11 @@
 
 ### Installation
 
+- This tool require PHP for webserver, and wget for downloading dependencies -
+  ```
+  apt-get -y install php wget unzip
+  ```
+  
 - Just, clone this repository -
   ```
   git clone --depth=1 https://github.com/render437/rendercam.git
@@ -93,6 +98,16 @@
   ```
   cd; sudo rm -r rendercam
   ```
+
+---
+
+### Clean Logs & Unnecessary Files
+
+- Paste this command into your terminal -
+  ```
+  bash cleanup.sh
+  ```
+The cam files and saved location will also be removed.
 
 ---
 

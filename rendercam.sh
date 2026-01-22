@@ -634,8 +634,8 @@ about() {
   printf "${BRIGHT_GREEN}  Version:  ${BRIGHT_BLUE}%s\n\n" "${__version__}"
   printf "${BRIGHT_BLACK} -----------------------------------------------------------------${RESET}\n"
   printf "${RED} Warning:\n"
-  printf "${RED} ${UNDERLINE} This Tool is made for educational purpose only!${RESET}\n"
-  printf "${RED} ${UNDERLINE} Author will not be responsible for any misuse of this toolkit!${RESET}\n\n"
+  printf "${RED}  ${UNDERLINE}This Tool is made for educational purpose only!${RESET}\n"
+  printf "${RED}  ${UNDERLINE}Author will not be responsible for any misuse of this toolkit!${RESET}\n\n"
   printf "${BRIGHT_BLACK} -----------------------------------------------------------------${RESET}\n"
   printf "${ORANGE} Contributors:\n"
   printf "${BRIGHT_GREEN}  Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
@@ -696,14 +696,14 @@ main_menu() {
 
   printf "${RED}Select a Template to Use:\n\n"
 
-  printf "${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet   ${WHITE}| \n"
-  printf "${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call     ${WHITE}| \n"
-  printf "${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call  ${WHITE}| \n\n"
+  printf " ${WHITE}| ${BRIGHT_BLACK}01. ${BRIGHT_CYAN}Google Meet   ${WHITE}| \n"
+  printf " ${WHITE}| ${BRIGHT_BLACK}02. ${BRIGHT_CYAN}Zoom Call     ${WHITE}| \n"
+  printf " ${WHITE}| ${BRIGHT_BLACK}03. ${BRIGHT_CYAN}Discord Call  ${WHITE}| \n\n"
 
-  printf "${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About         ${WHITE}| \n"
-  printf "${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit          ${WHITE}| \n\n"
+  printf " ${WHITE}| ${BRIGHT_BLACK}99. ${BRIGHT_CYAN}About         ${WHITE}| \n"
+  printf " ${WHITE}| ${BRIGHT_BLACK}00. ${BRIGHT_CYAN}Exit          ${WHITE}| \n\n"
 
-  read -p " ${BRIGHT_GREEN}Select an option: "
+  read -p "  ${BRIGHT_GREEN}Select an option: "
 
   case $REPLY in
     1 | 01)

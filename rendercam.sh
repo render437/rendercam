@@ -63,6 +63,7 @@ banner() {
   printf "${BRIGHT_CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | |\e[0m\n"
   printf "${BRIGHT_CYAN} |_|  \\___|_| |_|\\__,_|\\___|_|    \\___\\__,_|_| |_| |_|\e[0m\n"
   printf "${BRIGHT_RED}     Tool created by Render${RESET}${BRIGHT_CYAN}             Version: ${BRIGHT_RED}%s${RESET}\n" "${__version__}"
+  printf "${BRIGHT_RED}     www.techchip.net | youtube.com/techchipnet \e[0m\n"
   printf "\n"
 }
 
@@ -71,6 +72,7 @@ banner() {
 ## Small Banner
 banner_small() {
   clear
+  printf "${BRIGHT_BLUE}									   ${RESET}\n"
   printf "${BRIGHT_BLUE} ░░█▀▄░█▀▀░█▀█░█▀▄░█▀▀░█▀▄░█▀▀░█▀█░█▄█ ${RESET}\n"
   printf "${BRIGHT_BLUE} ░░█▀▄░█▀▀░█░█░█░█░█▀▀░█▀▄░█░░░█▀█░█░█ ${RESET}\n"
   printf "${BRIGHT_BLUE} ░░▀░▀░▀▀▀░▀░▀░▀▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀░▀ ${RESET}\n"
@@ -631,13 +633,13 @@ about() {
   printf "${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}%s\n\n" "${__version__}"
 
   printf "${RED}Warning:\n"
-  printf "${BLACK} ${REDBG}This Tool is made for educational purpose only!${RESETBG}\n"
-  printf "${BLACK} ${REDBG}Author will not be responsible for any misuse of this toolkit!${RESETBG}\n\n"
+  printf "${RED} ${UNDERLINE}This Tool is made for educational purpose only!${RESET}\n"
+  printf "${RED} ${UNDERLINE}Author will not be responsible for any misuse of this toolkit!${RESET}\n\n"
 
   printf "${ORANGE}Contributors:\n"
   printf "${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
 
-  printf "${BRIGHT_MAGENTA}0. Main Menu     ${BRIGHT_MAGENTA}99. Exit\n\n"
+  printf "${WHITE}| ${BRIGHT_MAGENTA}99. Main Menu   ${WHITE}|     ${BRIGHT_MAGENTA}00. Exit   ${WHITE}| \n\n"
 
   read -p "${MAGENTA}Select an option: "
 

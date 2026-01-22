@@ -63,7 +63,7 @@ banner() {
   printf "${BRIGHT_CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | |\e[0m\n"
   printf "${BRIGHT_CYAN} |_|  \\___|_| |_|\\__,_|\\___|_|    \\___\\__,_|_| |_| |_|\e[0m\n"
   printf "${BRIGHT_RED}     Tool created by Render${RESET}${BRIGHT_CYAN}             Version: ${BRIGHT_RED}%s${RESET}\n" "${__version__}"
-  printf "${BRIGHT_RED}     www.techchip.net | youtube.com/techchipnet \e[0m\n"
+  printf "${BRIGHT_RED}     https://github.com/render437 | https://beacons.ai/render437 \e[0m\n"
   printf "\n"
 }
 
@@ -631,24 +631,24 @@ about() {
   printf "${BRIGHT_GREEN} Author:   ${BRIGHT_BLUE}render437\n"
   printf "${BRIGHT_GREEN} Github:   ${BRIGHT_BLUE}https://github.com/render437\n"
   printf "${BRIGHT_GREEN} Version:  ${BRIGHT_BLUE}%s\n\n" "${__version__}"
-
+  printf "${BRIGHT_BLACK}-------------------------------------------------------------------------------------${RESET}\n"
   printf "${RED}Warning:\n"
   printf "${RED} ${UNDERLINE}This Tool is made for educational purpose only!${RESET}\n"
   printf "${RED} ${UNDERLINE}Author will not be responsible for any misuse of this toolkit!${RESET}\n\n"
-
+  printf "${BRIGHT_BLACK}-------------------------------------------------------------------------------------${RESET}\n"
   printf "${ORANGE}Contributors:\n"
   printf "${BRIGHT_GREEN} Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
-
-  printf "${WHITE}| ${BRIGHT_MAGENTA}99. Main Menu   ${WHITE}|     ${BRIGHT_MAGENTA}00. Exit   ${WHITE}| \n\n"
+  printf "${BRIGHT_BLACK}-------------------------------------------------------------------------------------${RESET}\n"
+  printf "  ${BRIGHT_CYAN}99.${RESET} About                   ${BRIGHT_CYAN}00.${RESET} Exit\n\n"
 
   read -p "${MAGENTA}Select an option: "
 
   case $REPLY in
     99)
-      msg_exit;;
-    0 | 00)
       printf "\n${CYAN} Returning to main menu..."
       { sleep 1; main_menu; };;
+    0 | 00)
+      msg_exit;;
     *)
       printf "\n${RED} Invalid Option, Try Again..."
       { sleep 1; about; };;

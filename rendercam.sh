@@ -63,7 +63,6 @@ banner() {
   printf "${BRIGHT_CYAN} | | |  __/ | | | (_| |  __/ |   | (_| (_| | | | | | |\e[0m\n"
   printf "${BRIGHT_CYAN} |_|  \\___|_| |_|\\__,_|\\___|_|    \\___\\__,_|_| |_| |_|\e[0m\n"
   printf "${BRIGHT_RED}     Tool created by Render${RESET}${BRIGHT_CYAN}             Version: ${BRIGHT_RED}%s${RESET}\n" "${__version__}"
-  printf "${BRIGHT_RED}     https://github.com/render437 | https://beacons.ai/render437 \e[0m\n"
   printf "\n"
 }
 

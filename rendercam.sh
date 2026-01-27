@@ -8,6 +8,9 @@ __version__="1.1.0"
 HOST='127.0.0.1'
 PORT='8080' 
 
+## Calls the update script to be ran
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 ## ANSI Colors (Foreground + Background)
 # Standard Colors
 BLACK="$(printf '\033[30m')"   RED="$(printf '\033[31m')"     GREEN="$(printf '\033[32m')"  
@@ -731,8 +734,9 @@ if [ -f config.conf ]; then
 fi
 
 ## Main Script
-kill_pid
-check_status
-dependencies
-check_status
-main_menu
+check_update  ## Checks for updates and updates the script if a new version is available.
+kill_pid      ## Kills any previously running instances of related processes.
+check_status  ## Checks the internet connection status and calls check_update if online.
+dependencies  ## Checks if the required dependencies (php) are installed.
+check_status  ## Re-checks the internet connection status.
+main_menu     ## Displays the main menu and starts the user interaction.

@@ -2,7 +2,7 @@
 
 # Rendercam v1.0.0
 
-__version__="1.1.0"
+__version__="1.1.5"
 
 ## DEFAULT HOST & PORT
 HOST='127.0.0.1'

@@ -732,6 +732,7 @@ fi
 
 ## Main Script
 kill_pid
+check_status
 dependencies
 check_status
 main_menu

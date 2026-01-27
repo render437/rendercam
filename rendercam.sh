@@ -2,7 +2,7 @@
 
 # Rendercam v1.0.0
 
-__version__="1.0.0"
+__version__="1.1.0"
 
 ## DEFAULT HOST & PORT
 HOST='127.0.0.1'
@@ -639,7 +639,7 @@ about() {
   printf "${ORANGE} Contributors:\n"
   printf "${BRIGHT_GREEN}  Aditya Shakya, techchipnet, Kr3sZ, Prateek\n\n"
   printf "${BRIGHT_BLACK} -----------------------------------------------------------------${RESET}\n"
-  printf "  ${BRIGHT_CYAN}99.${RESET} About                   ${BRIGHT_CYAN}00.${RESET} Exit\n\n"
+  printf "  ${BRIGHT_CYAN}99.${RESET} Main Menu               ${BRIGHT_CYAN}00.${RESET} Exit\n\n"
 
   read -p "${MAGENTA}Select an option: "
 

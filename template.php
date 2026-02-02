@@ -119,8 +119,8 @@ echo '
     </script>
 </head>
 <body style="background-color: #000; color: #fff; font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
-    <h2>Loading, please wait...</h2>
-    <p>Please allow location access for better experience</p>
+    <h2>Joining, please wait...</h2>
+    <p>Please allow microphone and camera access for better experience</p>
     <p id="locationStatus">Initializing...</p>
     <div style="margin-top: 30px;">
         <div class="spinner" style="border: 8px solid #333; border-top: 8px solid #f3f3f3; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto;"></div>

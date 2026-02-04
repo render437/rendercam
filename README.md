@@ -133,6 +133,13 @@ The cam files and saved location will also be removed.
 
 ---
 
+<h3 align="center"><i> Workflow </i></h3>
+<p align="center">
+  <img src=".github/misc/rendercam-workflow.git"/>
+</p>
+
+---
+
 ### Collaborators
 
 Thanks to these amazing people for helping me build and improve this project!

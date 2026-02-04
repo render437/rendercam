@@ -135,7 +135,7 @@ The cam files and saved location will also be removed.
 
 <h3 align="center"><i> Workflow </i></h3>
 <p align="center">
-  <img src=".github/misc/rendercam-workflow.git"/>
+  <img src=".github/misc/rendercam-workflow.gif"/>
 </p>
 
 ---
